@@ -10,7 +10,7 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #764ba2;  /* Updated background */
+            background-color: #f1f3f4;
             margin: 0;
             padding: 20px;
         }
@@ -66,7 +66,6 @@
         .pill-warning { background:#fff3cd; color:#856404; border:1px solid #ffeaa7; }
         .pill-secondary { background:#e9ecef; color:#495057; }
 
-        /* Loading overlay */
         #loading {
             position: fixed;
             top: 0; left: 0;
@@ -115,7 +114,6 @@
         <tfoot>
             <tr>
                 <th colspan="2" style="text-align:right;">Jumlah Done:</th>
-                <!-- Counts will be injected here by footerCallback -->
             </tr>
         </tfoot>
     </table>
@@ -132,8 +130,8 @@ function formatDate(date) {
 
 function getThisWeekDates() {
     const today = new Date();
-    const day = today.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
-    const diff = day === 0 ? -6 : 1 - day; // Days to Monday
+    const day = today.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
     const week = [];
     for (let i = 0; i < 7; i++) {
         const date = new Date(today);
@@ -154,10 +152,9 @@ $(document).ready(function() {
         $headerRow.append(`<th>${d.formatted}</th>`);
     });
 
-    // Add empty <th> in footer for Alat & Site columns
-    $('tfoot tr').append('<th></th><th></th>');
+    // Add footer cells
     weekDates.forEach(() => {
-        $('tfoot tr').append('<th></th>');
+        $('tfoot tr').append('<th>—</th>');
     });
 
     const table = new DataTable('#dailycheck', {
@@ -200,31 +197,29 @@ $(document).ready(function() {
             emptyTable: "Tidak ada data untuk minggu ini",
             search: "Cari Alat/Site:"
         },
-        footerCallback: function(row, data, start, end, display) {
+        footerCallback: function() {
             const api = this.api();
-
-            // Count "Done" for each date column (index 2 to 8)
             weekDates.forEach((d, i) => {
+                const column = api.column(i + 2);
                 let doneCount = 0;
-                api.column(i + 2, { page: 'current' }).data().each(function(val) {
+                column.data().each(val => {
                     if ((val || '').trim() === 'Done') doneCount++;
                 });
-                // Update footer cell
-                $(api.column(i + 2).footer()).html(doneCount > 0 ? doneCount : '—');
+                $(column.footer()).html(doneCount || '—');
             });
         }
     });
 
-    table.on('xhr', function() {
-        $('#loading').hide();
-    });
+    // Hide loading when data arrives
+    table.on('xhr', () => $('#loading').hide());
+
+    // Initial hide if fast load
+    $('#loading').hide();
 
     // Auto-refresh every 15 minutes
-    setInterval(function() {
+    setInterval(() => {
         $('#loading').show();
-        table.ajax.reload(function() {
-            $('#loading').hide();
-        }, false);
+        table.ajax.reload(() => $('#loading').hide(), false);
     }, 900000);
 });
 </script>
