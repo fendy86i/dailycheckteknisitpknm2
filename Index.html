@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Daily Check Teknisi - Minggu Ini</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.5/css/dataTables.dataTables.css"/>
+    <style>
+        .pill {
+            display: inline-block;
+            padding: 7px 16px;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 50px;
+            min-width: 80px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .pill-success { background:#d4edda; color:#000000; border:1px solid #c3e6cb; }
+        .pill-danger { background:#f8d7da; color:#000000; border:1px solid #f5c6cb; }
+        .pill-warning { background:#a8d3f9; color:#000000; border:1px solid #ffeaa7; }
+        .pill-secondary{ background:#e9ecef; color:#000000; }
+    </style>
+</head>
+<body>
+<h1>Daily Check Teknisi - Minggu Ini</h1>
+<table id="dailycheck" class="display" style="width:100%">
+    <thead><tr id="headerRow">
+        <th>Alat</th>
+        <th>Site</th>
+        <!-- Dates injected here -->
+    </tr></thead>
+</table>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/2.1.5/js/dataTables.js"></script>
+<script>
+function formatDate(date) {
+    const options = { day: 'numeric', month: 'short' };
+    return date.toLocaleDateString('id-ID', options);
+}
+
+function getThisWeekDates() {
+    const today = new Date();
+    const day = today.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+    const diff = day === 0 ? -6 : 1 - day; // To Monday
+    const week = [];
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + diff + i);
+        week.push({
+            formatted: formatDate(date),
+            iso: date.toISOString().split('T')[0]
+        });
+    }
+    return week;
+}
+
+$(document).ready(function() {
+    const weekDates = getThisWeekDates();
+
+    const $headerRow = $('#headerRow');
+    weekDates.forEach(d => {
+        $headerRow.append(`<th>${d.formatted}</th>`);
+    });
+
+    new DataTable('#dailycheck', {
+		ajax: {
+		    url: 'https://script.google.com/macros/s/AKfycbyYwY4etRBGph7G60_6Q9aHsX46o1L-1r2R57LoMfIAeHY9iRR_0u3mlSo8DCrGK8iS/exec',
+		    dataSrc: 'data',
+		    cache: false,  // Disable DataTables internal cache
+		    data: function(d) {
+		        d.ts = new Date().getTime();  // Add unique timestamp to URL query
+		    }
+		},
+        columns: [
+            { data: 'Alat' },
+            { data: 'Site' },
+            ...weekDates.map(d => ({ 
+                data: d.iso,
+                defaultContent: '—'
+            }))
+        ],
+        columnDefs: [
+            {
+                targets: [2,3,4,5,6,7,8],
+                className: 'dt-center',
+                render: function(data, type) {
+                    if (type === 'display') {
+                        const val = (data || '').trim();
+                        if (val === 'Done') return '<span class="pill pill-success">Done</span>';
+                        if (val === 'Miss') return '<span class="pill pill-danger">Miss</span>';
+                        if (val === 'Open') return '<span class="pill pill-warning">Open</span>';
+                        if (val) return '<span class="pill pill-secondary">' + val + '</span>';
+                        return '—';
+                    }
+                    return data || '';
+                }
+            }
+        ],
+        order: [[0, 'asc']],
+        language: {
+            loadingRecords: "Memuat data minggu ini...",
+            emptyTable: "Tidak ada data untuk minggu ini"
+        }
+    });
+});
+</script>
+</body>
+</html>
