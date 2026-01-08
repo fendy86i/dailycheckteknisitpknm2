@@ -10,7 +10,7 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
+            background-color: #764ba2;  /* Updated background */
             margin: 0;
             padding: 20px;
         }
@@ -43,8 +43,13 @@
             font-weight: 600;
             color: #495057;
         }
+        tfoot th {
+            background-color: #e9ecef;
+            font-weight: bold;
+            color: #343a40;
+        }
         tr:hover {
-            background-color: #f1f3f5;
+            background-color: #f8f9fa;
         }
         .pill {
             display: inline-block;
@@ -60,11 +65,6 @@
         .pill-danger  { background:#f8d7da; color:#721c24; border:1px solid #f5c6cb; }
         .pill-warning { background:#fff3cd; color:#856404; border:1px solid #ffeaa7; }
         .pill-secondary { background:#e9ecef; color:#495057; }
-
-        /* Today column highlight */
-        .today-col {
-            background-color: #fff3cd !important;
-        }
 
         /* Loading overlay */
         #loading {
@@ -112,6 +112,12 @@
                 <th>Site</th>
             </tr>
         </thead>
+        <tfoot>
+            <tr>
+                <th colspan="2" style="text-align:right;">Jumlah Done:</th>
+                <!-- Counts will be injected here by footerCallback -->
+            </tr>
+        </tfoot>
     </table>
 </div>
 
@@ -146,6 +152,12 @@ $(document).ready(function() {
     const $headerRow = $('#headerRow');
     weekDates.forEach(d => {
         $headerRow.append(`<th>${d.formatted}</th>`);
+    });
+
+    // Add empty <th> in footer for Alat & Site columns
+    $('tfoot tr').append('<th></th><th></th>');
+    weekDates.forEach(() => {
+        $('tfoot tr').append('<th></th>');
     });
 
     const table = new DataTable('#dailycheck', {
@@ -188,12 +200,17 @@ $(document).ready(function() {
             emptyTable: "Tidak ada data untuk minggu ini",
             search: "Cari Alat/Site:"
         },
-        drawCallback: function() {
-            const todayISO = new Date().toISOString().split('T')[0];
+        footerCallback: function(row, data, start, end, display) {
+            const api = this.api();
+
+            // Count "Done" for each date column (index 2 to 8)
             weekDates.forEach((d, i) => {
-                if (d.iso === todayISO) {
-                    $(`th:eq(${i + 2}), td:nth-child(${i + 3})`).addClass('today-col');
-                }
+                let doneCount = 0;
+                api.column(i + 2, { page: 'current' }).data().each(function(val) {
+                    if ((val || '').trim() === 'Done') doneCount++;
+                });
+                // Update footer cell
+                $(api.column(i + 2).footer()).html(doneCount > 0 ? doneCount : '—');
             });
         }
     });
@@ -202,12 +219,13 @@ $(document).ready(function() {
         $('#loading').hide();
     });
 
+    // Auto-refresh every 15 minutes
     setInterval(function() {
         $('#loading').show();
         table.ajax.reload(function() {
             $('#loading').hide();
         }, false);
-    }, 900000); // 15 minutes
+    }, 900000);
 });
 </script>
 
