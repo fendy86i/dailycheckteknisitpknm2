@@ -12,22 +12,31 @@
             margin: 0;
             padding: 20px 10px;
             font-family: Arial, Helvetica, sans-serif;
-            background-color: #24084F;  /* Dark purple like calendar */
+            background-color: #24084F;
             color: white;
+            min-height: 100vh;
         }
         h1 {
             text-align: center;
-            color: white;  /* White title */
-            margin-bottom: 30px;
+            color: white;
+            margin: 0 0 30px 0;
+            font-size: 28px;
+            padding: 0 10px;
         }
         #table-card {
-            max-width: 1200px;
-            margin: 20px auto;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
             background-color: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
             color: #333;
+            box-sizing: border-box;
+        }
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
         }
         table {
             width: 100%;
@@ -45,9 +54,9 @@
             background-color: #e9ecef;
             font-weight: 600;
         }
-        /* Center Alat and Site headers */
+        /* Force center Alat & Site headers */
         th:nth-child(1), th:nth-child(2) {
-            text-align: center;
+            text-align: center !important;
         }
         tfoot th {
             background-color: #e9ecef;
@@ -99,6 +108,27 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 22px;
+                padding: 0 5px;
+            }
+            #table-card {
+                padding: 15px 10px;
+                border-radius: 6px;
+            }
+            th, td {
+                padding: 10px 8px;
+                font-size: 14px;
+            }
+            .pill {
+                padding: 6px 14px;
+                font-size: 13px;
+                min-width: 80px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -110,19 +140,21 @@
 </div>
 
 <div id="table-card">
-    <table id="dailycheck" class="display" style="width:100%">
-        <thead>
-            <tr id="headerRow">
-                <th>Alat</th>
-                <th>Site</th>
-            </tr>
-        </thead>
-        <tfoot>
-            <tr>
-                <th colspan="2" style="text-align:right;">Jumlah Done:</th>
-            </tr>
-        </tfoot>
-    </table>
+    <div class="table-container">
+        <table id="dailycheck" class="display" style="width:100%">
+            <thead>
+                <tr id="headerRow">
+                    <th>Alat</th>
+                    <th>Site</th>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <th colspan="2" style="text-align:right;">Jumlah Done:</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
