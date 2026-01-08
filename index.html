@@ -98,7 +98,7 @@
 </head>
 <body>
 
-<h1>Daily Check Teknisi - Minggu Ini</h1>
+<h1>Daily Check Teknisi TPKNM2 - Minggu Ini</h1>
 
 <div id="loading">
     <div>Memuat data minggu ini...</div>
@@ -110,7 +110,6 @@
             <tr id="headerRow">
                 <th>Alat</th>
                 <th>Site</th>
-                <!-- Dates injected by JS -->
             </tr>
         </thead>
     </table>
@@ -144,17 +143,73 @@ function getThisWeekDates() {
 $(document).ready(function() {
     const weekDates = getThisWeekDates();
 
-    // Inject headers
     const $headerRow = $('#headerRow');
     weekDates.forEach(d => {
         $headerRow.append(`<th>${d.formatted}</th>`);
     });
 
-    // Initialize DataTable
     const table = new DataTable('#dailycheck', {
         ajax: {
             url: 'https://script.google.com/macros/s/AKfycbxSwSlCEN9ar6MILTXA5W4p0GkGWbHIp77yXiAACd8Bvoi2eOG48TFtXRvuUt31oFkx/exec',
             dataSrc: 'data',
             cache: false,
             data: function(d) {
-                d.ts = new Date
+                d.ts = new Date().getTime();
+            }
+        },
+        columns: [
+            { data: 'Alat' },
+            { data: 'Site' },
+            ...weekDates.map(d => ({ 
+                data: d.iso,
+                defaultContent: '—'
+            }))
+        ],
+        columnDefs: [
+            {
+                targets: [2,3,4,5,6,7,8],
+                className: 'dt-center',
+                render: function(data, type) {
+                    if (type === 'display') {
+                        const val = (data || '').trim();
+                        if (val === 'Done')  return '<span class="pill pill-success">Done</span>';
+                        if (val === 'Miss')  return '<span class="pill pill-danger">Miss</span>';
+                        if (val === 'Open')  return '<span class="pill pill-warning">Open</span>';
+                        if (val)             return '<span class="pill pill-secondary">' + val + '</span>';
+                        return '—';
+                    }
+                    return data || '';
+                }
+            }
+        ],
+        order: [[0, 'asc']],
+        language: {
+            loadingRecords: "Memuat data...",
+            emptyTable: "Tidak ada data untuk minggu ini",
+            search: "Cari Alat/Site:"
+        },
+        drawCallback: function() {
+            const todayISO = new Date().toISOString().split('T')[0];
+            weekDates.forEach((d, i) => {
+                if (d.iso === todayISO) {
+                    $(`th:eq(${i + 2}), td:nth-child(${i + 3})`).addClass('today-col');
+                }
+            });
+        }
+    });
+
+    table.on('xhr', function() {
+        $('#loading').hide();
+    });
+
+    setInterval(function() {
+        $('#loading').show();
+        table.ajax.reload(function() {
+            $('#loading').hide();
+        }, false);
+    }, 900000); // 15 minutes
+});
+</script>
+
+</body>
+</html>
