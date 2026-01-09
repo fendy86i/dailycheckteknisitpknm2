@@ -8,139 +8,123 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/2.1.5/css/dataTables.dataTables.css"/>
 
 <style>
-/* ===== Page ===== */
 body {
     margin: 0;
     padding: 16px 10px;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    font-family: system-ui, Arial, sans-serif;
     background: #24084F;
     color: white;
 }
 
 h1 {
     text-align: center;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     font-size: 22px;
 }
 
-/* ===== Card ===== */
 #table-card {
     max-width: 1400px;
     margin: auto;
     background: #fff;
     border-radius: 10px;
-    padding: 14px;
+    padding: 12px;
     color: #333;
     box-shadow: 0 6px 20px rgba(0,0,0,.35);
 }
 
-/* ===== Scroll container ===== */
-.table-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    position: relative;
+/* DataTables spacing fix */
+.dataTables_wrapper {
+    margin-top: 8px;
 }
 
-/* ===== Table ===== */
+/* Scroll container */
+.table-container {
+    overflow-x: auto;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Table */
 table {
     width: 100%;
     min-width: 900px;
+    table-layout: fixed;
     border-collapse: separate;
     border-spacing: 0;
-    table-layout: fixed;
     background: #fff;
 }
 
 th, td {
-    padding: 10px 12px;
+    padding: 10px;
     text-align: center;
     white-space: nowrap;
     border-bottom: 1px solid #e0e0e0;
     font-size: 14px;
 }
 
-/* ===== Header ===== */
+/* Header */
 thead th {
     background: #f1f3f5;
-    font-weight: 600;
     position: sticky;
     top: 0;
     z-index: 30;
 }
 
-/* ===== Footer ===== */
+/* Footer */
 tfoot th {
     background: #f1f3f5;
     font-weight: 700;
-    text-align: center;
     position: sticky;
     bottom: 0;
-    z-index: 25;
+    z-index: 20;
 }
 
-/* ===== Column widths ===== */
-th:nth-child(1), td:nth-child(1), tfoot th:nth-child(1) {
-    width: 140px;
-    min-width: 140px;
-}
+/* Column widths */
+.col-alat { width: 140px; min-width: 140px; }
+.col-site { width: 120px; min-width: 120px; }
 
-th:nth-child(2), td:nth-child(2), tfoot th:nth-child(2) {
-    width: 120px;
-    min-width: 120px;
-}
-
-/* ===== Frozen column 1 ===== */
-th:nth-child(1),
-td:nth-child(1),
-tfoot th:nth-child(1) {
+/* Frozen columns */
+.sticky-1 {
     position: sticky;
     left: 0;
-    background: #fff;
     z-index: 50;
+    background: #fff;
 }
 
-/* ===== Frozen column 2 ===== */
-th:nth-child(2),
-td:nth-child(2),
-tfoot th:nth-child(2) {
+.sticky-2 {
     position: sticky;
     left: 140px;
-    background: #fff;
     z-index: 45;
+    background: #fff;
 }
 
-/* ===== Divider shadow ===== */
-th:nth-child(2)::after,
-td:nth-child(2)::after,
-tfoot th:nth-child(2)::after {
+/* Divider */
+.sticky-2::after {
     content: "";
     position: absolute;
     top: 0;
     right: -6px;
     width: 6px;
     height: 100%;
-    background: linear-gradient(to right, rgba(0,0,0,0.18), transparent);
-    pointer-events: none;
+    background: linear-gradient(to right, rgba(0,0,0,0.2), transparent);
 }
 
-/* ===== Pills ===== */
+/* Pills */
 .pill {
     display: inline-block;
     padding: 6px 14px;
     border-radius: 999px;
     font-size: 12px;
     font-weight: 700;
-    min-width: 72px;
+    min-width: 70px;
 }
-
 .pill-success { background:#d4edda; color:#155724; }
 .pill-danger  { background:#f8d7da; color:#721c24; }
 .pill-warning { background:#fff3cd; color:#856404; }
-.pill-secondary { background:#e9ecef; color:#495057; }
 
-/* ===== Mobile ===== */
+/* Mobile */
 @media (max-width: 768px) {
-    th, td { font-size: 13px; padding: 8px 10px; }
+    th, td { font-size: 13px; padding: 8px; }
 }
 </style>
 </head>
@@ -155,14 +139,15 @@ tfoot th:nth-child(2)::after {
 
 <thead>
 <tr id="headerRow">
-    <th>Alat</th>
-    <th>Site</th>
+    <th class="col-alat sticky-1">Alat</th>
+    <th class="col-site sticky-2">Site</th>
 </tr>
 </thead>
 
 <tfoot>
-<tr>
-    <th colspan="2" style="text-align:right;">Jumlah Done</th>
+<tr id="footerRow">
+    <th class="sticky-1"></th>
+    <th class="sticky-2">Jumlah Done</th>
 </tr>
 </tfoot>
 
@@ -174,64 +159,57 @@ tfoot th:nth-child(2)::after {
 <script src="https://cdn.datatables.net/2.1.5/js/dataTables.js"></script>
 
 <script>
-function formatDate(date) {
-    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+function formatDate(d) {
+    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
 }
 
-function getThisWeekDates() {
-    const today = new Date();
-    const day = today.getDay();
-    const diff = day === 0 ? -6 : 1 - day;
+function getWeek() {
+    const t = new Date();
+    const d = t.getDay();
+    const start = d === 0 ? -6 : 1 - d;
     return Array.from({length:7}, (_,i) => {
-        const d = new Date(today);
-        d.setDate(today.getDate() + diff + i);
-        return { formatted: formatDate(d), iso: d.toISOString().split('T')[0] };
+        const x = new Date(t);
+        x.setDate(t.getDate() + start + i);
+        return { label: formatDate(x), key: x.toISOString().split('T')[0] };
     });
 }
 
 $(function () {
-    const weekDates = getThisWeekDates();
+    const days = getWeek();
 
-    weekDates.forEach(d => $('#headerRow').append(`<th>${d.formatted}</th>`));
-    weekDates.forEach(() => $('tfoot tr').append('<th>—</th>'));
+    days.forEach(d => {
+        $('#headerRow').append(`<th>${d.label}</th>`);
+        $('#footerRow').append('<th>—</th>');
+    });
 
     const table = new DataTable('#dailycheck', {
         autoWidth: false,
         scrollX: false,
         ajax: {
             url: 'https://script.google.com/macros/s/AKfycbxSwSlCEN9ar6MILTXA5W4p0GkGWbHIp77yXiAACd8Bvoi2eOG48TFtXRvuUt31oFkx/exec',
-            dataSrc: 'data',
-            cache: false
+            dataSrc: 'data'
         },
         columns: [
-            { data: 'Alat', width: '140px' },
-            { data: 'Site', width: '120px' },
-            ...weekDates.map(d => ({ data: d.iso }))
+            { data: 'Alat', className:'sticky-1 col-alat' },
+            { data: 'Site', className:'sticky-2 col-site' },
+            ...days.map(d => ({ data: d.key }))
         ],
         columnDefs: [{
             targets: '_all',
-            render: function (data, type) {
-                if (type !== 'display') return data || '';
-                const v = (data || '').trim();
-                if (v === 'Done') return '<span class="pill pill-success">Done</span>';
-                if (v === 'Miss') return '<span class="pill pill-danger">Miss</span>';
-                if (v === 'Open') return '<span class="pill pill-warning">Open</span>';
-                return v ? `<span class="pill pill-secondary">${v}</span>` : '—';
+            render: (d,t) => {
+                if (t !== 'display') return d || '';
+                if (d === 'Done') return '<span class="pill pill-success">Done</span>';
+                if (d === 'Miss') return '<span class="pill pill-danger">Miss</span>';
+                if (d === 'Open') return '<span class="pill pill-warning">Open</span>';
+                return d || '—';
             }
         }],
-        order: [[0, 'asc']],
-        language: {
-            search: "Cari:",
-            emptyTable: "Tidak ada data minggu ini"
-        },
         footerCallback: function () {
             const api = this.api();
-            weekDates.forEach((_, i) => {
-                let count = 0;
-                api.column(i + 2).data().each(v => {
-                    if ((v || '').trim() === 'Done') count++;
-                });
-                $(api.column(i + 2).footer()).html(count || '—');
+            days.forEach((_, i) => {
+                let c = 0;
+                api.column(i + 2).data().each(v => { if (v === 'Done') c++; });
+                $(api.column(i + 2).footer()).html(c || '—');
             });
         }
     });
