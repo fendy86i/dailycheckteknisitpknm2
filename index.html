@@ -159,4 +159,126 @@ tfoot td {
 
 <h1>Daily Check Teknisi – Minggu Ini</h1>
 
-<div cla
+<div class="card">
+<div class="table-wrapper">
+<table id="dailyTable">
+
+<thead>
+<tr id="headerRow">
+  <th class="col-alat sticky-alat">Alat</th>
+  <th class="col-site sticky-site">Site</th>
+</tr>
+</thead>
+
+<tbody id="tableBody"></tbody>
+
+<tfoot>
+<tr id="footerRow">
+  <td colspan="2" class="sticky-alat sticky-site">Jumlah Done</td>
+</tr>
+</tfoot>
+
+</table>
+</div>
+</div>
+
+<script>
+const SCRIPT_URL = "YOUR_SCRIPT_URL_HERE";
+
+/* ===== WEEK DATES ===== */
+function getWeekDates() {
+  const today = new Date();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - (today.getDay() || 7) + 1);
+
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return {
+      label: d.toLocaleDateString("id-ID", { day: "numeric", month: "short" }),
+      iso: d.toISOString().split("T")[0]
+    };
+  });
+}
+
+const weekDates = getWeekDates();
+
+/* ===== HEADER ===== */
+const headerRow = document.getElementById("headerRow");
+weekDates.forEach((d, i) => {
+  const th = document.createElement("th");
+  th.className = "date-col";
+  th.innerHTML = `${d.label} <span class="sort-btn" onclick="sortByDone(${i + 2})">▲</span>`;
+  headerRow.appendChild(th);
+});
+
+/* ===== FOOTER ===== */
+const footerRow = document.getElementById("footerRow");
+weekDates.forEach(() => {
+  const td = document.createElement("td");
+  td.textContent = "—";
+  footerRow.appendChild(td);
+});
+
+/* ===== LOAD DATA ===== */
+fetch(SCRIPT_URL)
+  .then(r => r.json())
+  .then(json => buildTable(json.data));
+
+function buildTable(data) {
+  const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = "";
+
+  data.forEach(row => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td class="sticky-alat col-alat">${row.Alat}</td>
+      <td class="sticky-site col-site">${row.Site}</td>
+    `;
+
+    weekDates.forEach(d => {
+      const val = row[d.iso] || "";
+      let html = "—";
+      if (val === "Done") html = `<span class="pill done">Done</span>`;
+      else if (val === "Miss") html = `<span class="pill miss">Miss</span>`;
+      else if (val === "Open") html = `<span class="pill open">Open</span>`;
+      tr.innerHTML += `<td class="date-col">${html}</td>`;
+    });
+
+    tbody.appendChild(tr);
+  });
+
+  updateFooter();
+}
+
+/* ===== SORT ===== */
+function sortByDone(col) {
+  const tbody = document.getElementById("tableBody");
+  const rows = [...tbody.rows];
+
+  rows.sort((a, b) => {
+    const A = a.cells[col].innerText.trim();
+    const B = b.cells[col].innerText.trim();
+    if (A === "Done" && B !== "Done") return -1;
+    if (A !== "Done" && B === "Done") return 1;
+    return 0;
+  });
+
+  rows.forEach(r => tbody.appendChild(r));
+}
+
+/* ===== FOOTER COUNT ===== */
+function updateFooter() {
+  weekDates.forEach((_, i) => {
+    let count = 0;
+    document.querySelectorAll("#tableBody tr").forEach(r => {
+      if (r.cells[i + 2].innerText.trim() === "Done") count++;
+    });
+    footerRow.cells[i + 1].textContent = count || "—";
+  });
+}
+</script>
+
+</body>
+</html>
