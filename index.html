@@ -6,6 +6,7 @@
 <title>Daily Check Teknisi</title>
 
 <style>
+/* ===== BASE ===== */
 body {
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
@@ -19,28 +20,31 @@ h1 {
   font-size: 22px;
 }
 
-/* CARD */
+/* ===== CARD ===== */
 .card {
   background: white;
-  margin: 12px;
+  margin: 12px auto;
   padding: 8px;
   border-radius: 10px;
+  max-width: 1400px;   /* center on PC */
 }
 
-/* TABLE */
+/* ===== TABLE WRAPPER ===== */
 .table-wrapper {
   overflow-x: auto;
 }
 
+/* ===== TABLE ===== */
 table {
-  width: 100%;
-  min-width: 1000px;
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
+  width: 100%;
+  min-width: 980px;   /* PC: leave left & right blank space */
   font-size: 14px;
 }
 
+/* ===== CELLS ===== */
 th, td {
   padding: 6px 4px;
   text-align: center;
@@ -48,7 +52,7 @@ th, td {
   white-space: nowrap;
 }
 
-/* HEADER */
+/* ===== HEADER ===== */
 thead th {
   position: sticky;
   top: 0;
@@ -56,11 +60,12 @@ thead th {
   z-index: 40;
 }
 
-/* STICKY COLUMNS */
+/* ===== STICKY COLUMNS ===== */
 .col-alat {
-  width: 64px;
-  min-width: 64px;
+  width: 80px;        /* extended a little */
+  min-width: 80px;
 }
+
 .col-site {
   width: 70px;
   min-width: 70px;
@@ -75,36 +80,77 @@ thead th {
 
 .sticky-site {
   position: sticky;
-  left: 64px;
+  left: 80px;        /* MUST match .col-alat width */
   background: #fafafa;
   z-index: 55;
 }
 
-/* STATUS */
+/* ===== DATE COLUMNS ===== */
+.date-col {
+  width: 90px;       /* PC size */
+  min-width: 90px;
+}
+
+/* ===== STATUS PILLS ===== */
 .pill {
-  padding: 4px 10px;
+  padding: 4px 8px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: bold;
 }
 .done { background:#d4edda; color:#155724; }
 .miss { background:#f8d7da; color:#721c24; }
 .open { background:#fff3cd; color:#856404; }
 
-/* SORT */
+/* ===== SORT ICON ===== */
 .sort-btn {
   font-size: 10px;
   cursor: pointer;
+  margin-left: 4px;
   opacity: 0.6;
 }
 .sort-btn:hover { opacity: 1; }
 
-/* FOOTER */
+/* ===== FOOTER ===== */
 tfoot td {
   position: sticky;
   bottom: 0;
   background: #f1f3f5;
   font-weight: bold;
+}
+
+/* ===================== */
+/* 📱 MOBILE OPTIMIZATION */
+/* ===================== */
+@media (max-width: 768px) {
+
+  table {
+    min-width: 100%;      /* fill screen, no blank space */
+  }
+
+  .col-alat {
+    width: 72px;
+    min-width: 72px;
+  }
+
+  .col-site {
+    width: 64px;
+    min-width: 64px;
+  }
+
+  .sticky-site {
+    left: 72px;
+  }
+
+  .date-col {
+    width: 64px;         /* narrow date columns */
+    min-width: 64px;
+  }
+
+  .pill {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
 }
 </style>
 </head>
@@ -113,123 +159,4 @@ tfoot td {
 
 <h1>Daily Check Teknisi – Minggu Ini</h1>
 
-<div class="card">
-<div class="table-wrapper">
-<table id="dailyTable">
-<thead>
-<tr id="headerRow">
-  <th class="col-alat sticky-alat">Alat</th>
-  <th class="col-site sticky-site">Site</th>
-</tr>
-</thead>
-
-<tbody id="tableBody"></tbody>
-
-<tfoot>
-<tr id="footerRow">
-  <td colspan="2" class="sticky-alat sticky-site">Jumlah Done</td>
-</tr>
-</tfoot>
-</table>
-</div>
-</div>
-
-<script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxSwSlCEN9ar6MILTXA5W4p0GkGWbHIp77yXiAACd8Bvoi2eOG48TFtXRvuUt31oFkx/exec";
-
-/* ===== DATE HELPERS ===== */
-function getWeekDates() {
-  const today = new Date();
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - (today.getDay() || 7) + 1);
-
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    return {
-      label: d.toLocaleDateString("id-ID", { day: "numeric", month: "short" }),
-      iso: d.toISOString().split("T")[0]
-    };
-  });
-}
-
-const weekDates = getWeekDates();
-
-/* ===== BUILD HEADER ===== */
-const headerRow = document.getElementById("headerRow");
-weekDates.forEach((d, i) => {
-  const th = document.createElement("th");
-  th.innerHTML = `${d.label} <span class="sort-btn" onclick="sortByDone(${i + 2})">▲</span>`;
-  headerRow.appendChild(th);
-});
-
-/* ===== BUILD FOOTER ===== */
-const footerRow = document.getElementById("footerRow");
-weekDates.forEach(() => {
-  const td = document.createElement("td");
-  td.textContent = "—";
-  footerRow.appendChild(td);
-});
-
-/* ===== LOAD DATA ===== */
-fetch(SCRIPT_URL)
-  .then(res => res.json())
-  .then(json => buildTable(json.data));
-
-function buildTable(data) {
-  const tbody = document.getElementById("tableBody");
-  tbody.innerHTML = "";
-
-  data.forEach(row => {
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td class="sticky-alat col-alat">${row.Alat}</td>
-      <td class="sticky-site col-site">${row.Site}</td>
-    `;
-
-    weekDates.forEach(d => {
-      const val = row[d.iso] || "";
-      let html = "—";
-      if (val === "Done") html = `<span class="pill done">Done</span>`;
-      else if (val === "Miss") html = `<span class="pill miss">Miss</span>`;
-      else if (val === "Open") html = `<span class="pill open">Open</span>`;
-      tr.innerHTML += `<td>${html}</td>`;
-    });
-
-    tbody.appendChild(tr);
-  });
-
-  updateFooter();
-}
-
-/* ===== SORT ===== */
-function sortByDone(colIndex) {
-  const tbody = document.getElementById("tableBody");
-  const rows = Array.from(tbody.rows);
-
-  rows.sort((a, b) => {
-    const A = a.cells[colIndex].innerText.trim();
-    const B = b.cells[colIndex].innerText.trim();
-    if (A === "Done" && B !== "Done") return -1;
-    if (A !== "Done" && B === "Done") return 1;
-    return 0;
-  });
-
-  rows.forEach(r => tbody.appendChild(r));
-}
-
-/* ===== FOOTER COUNT ===== */
-function updateFooter() {
-  weekDates.forEach((_, i) => {
-    let count = 0;
-    document.querySelectorAll(`#tableBody tr`).forEach(r => {
-      if (r.cells[i + 2].innerText.trim() === "Done") count++;
-    });
-    footerRow.cells[i + 1].textContent = count || "—";
-  });
-}
-</script>
-
-</body>
-</html>
+<div cla
