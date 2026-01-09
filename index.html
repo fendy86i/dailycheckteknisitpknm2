@@ -1,126 +1,127 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Daily Check Teknisi TPKNM2</title>
 
 <style>
+/* ===== BASE ===== */
 body {
   margin: 0;
-  padding: 14px 8px;
-  font-family: system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   background: #24084F;
+  color: #333;
 }
 
 h1 {
-  color: #fff;
   text-align: center;
-  font-size: 20px;
-  margin-bottom: 12px;
+  color: white;
+  padding: 16px 8px;
+  margin: 0;
+  font-size: 22px;
 }
 
+/* ===== CARD ===== */
 .card {
-  max-width: 1400px;
-  margin: auto;
-  background: #fff;
-  border-radius: 12px;
-  padding: 12px;
-  box-shadow: 0 6px 24px rgba(0,0,0,.35);
+  background: white;
+  margin: 12px;
+  padding: 8px;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
-.table-wrap {
+/* ===== TABLE WRAPPER ===== */
+.table-wrapper {
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  position: relative;
 }
 
+/* ===== TABLE ===== */
 table {
-  width: 100%;
-  min-width: 760px;
-  table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
+  width: 100%;
+  min-width: 900px;
+  table-layout: fixed;
+  font-size: 14px;
 }
 
-th, td {
-  padding: 8px 6px;
-  font-size: 13px;
-  text-align: center;
-  white-space: nowrap;
-  border-bottom: 1px solid #e0e0e0;
-}
-
+/* ===== HEADER ===== */
 thead th {
-  background: #f1f3f5;
-  font-weight: 700;
   position: sticky;
   top: 0;
+  background: #f1f3f5;
   z-index: 40;
+  border-bottom: 2px solid #ccc;
 }
 
-/* widths */
-.col-alat { width: 90px; min-width: 90px; }
-.col-site { width: 80px; min-width: 80px; }
-.col-day  { width: 95px; min-width: 95px; }
+/* ===== CELLS ===== */
+th, td {
+  padding: 6px 4px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  white-space: nowrap;
+}
 
-/* sticky columns */
+/* ===== STICKY COLUMNS ===== */
+.col-alat {
+  width: 64px;
+  min-width: 64px;
+}
+
+.col-site {
+  width: 70px;
+  min-width: 70px;
+}
+
 .sticky-alat {
   position: sticky;
   left: 0;
-  background: #fff;
+  background: #fafafa;
   z-index: 60;
 }
 
 .sticky-site {
   position: sticky;
-  left: 90px;
-  background: #fff;
+  left: 64px;
+  background: #fafafa;
   z-index: 55;
 }
 
-.sticky-site::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: -6px;
-  width: 6px;
-  height: 100%;
-  background: linear-gradient(to right, rgba(0,0,0,.25), transparent);
-}
-
-/* status pill */
+/* ===== PILLS ===== */
 .pill {
   display: inline-block;
-  min-width: 60px;
-  padding: 5px 10px;
+  padding: 4px 10px;
   border-radius: 999px;
-  font-size: 11px;
   font-weight: 700;
+  font-size: 12px;
 }
 
 .done { background:#d4edda; color:#155724; }
 .miss { background:#f8d7da; color:#721c24; }
 .open { background:#fff3cd; color:#856404; }
 
-/* sort button */
+/* ===== SORT BUTTON ===== */
 .sort-btn {
   cursor: pointer;
-  font-size: 11px;
+  font-size: 10px;
   margin-left: 4px;
   user-select: none;
-  opacity: .6;
+  opacity: 0.6;
 }
 
-.sort-btn.active {
+.sort-btn:hover {
   opacity: 1;
-  font-weight: 800;
 }
 
-tfoot th {
-  background: #f1f3f5;
-  font-weight: 700;
+/* ===== FOOTER ===== */
+tfoot td {
   position: sticky;
   bottom: 0;
+  background: #f1f3f5;
+  font-weight: bold;
+  z-index: 30;
 }
 </style>
 </head>
@@ -130,22 +131,51 @@ tfoot th {
 <h1>Daily Check Teknisi TPKNM2 - Minggu Ini</h1>
 
 <div class="card">
-<div class="table-wrap">
-<table>
+<div class="table-wrapper">
+<table id="dailyTable">
 
 <thead>
-<tr id="thead">
+<tr>
   <th class="col-alat sticky-alat">Alat</th>
   <th class="col-site sticky-site">Site</th>
+  <th>6 Jan <span class="sort-btn" onclick="sortByDone(2)">▲</span></th>
+  <th>7 Jan <span class="sort-btn" onclick="sortByDone(3)">▲</span></th>
+  <th>8 Jan <span class="sort-btn" onclick="sortByDone(4)">▲</span></th>
+  <th>9 Jan <span class="sort-btn" onclick="sortByDone(5)">▲</span></th>
+  <th>10 Jan <span class="sort-btn" onclick="sortByDone(6)">▲</span></th>
 </tr>
 </thead>
 
-<tbody id="tbody"></tbody>
+<tbody id="tableBody">
+<tr>
+  <td class="sticky-alat col-alat">FL01</td>
+  <td class="sticky-site col-site">TPKNM2</td>
+  <td><span class="pill done">Done</span></td>
+  <td><span class="pill miss">Miss</span></td>
+  <td><span class="pill miss">Miss</span></td>
+  <td><span class="pill miss">Miss</span></td>
+  <td><span class="pill open">Open</span></td>
+</tr>
+
+<tr>
+  <td class="sticky-alat col-alat">HT01</td>
+  <td class="sticky-site col-site">TPKNM2</td>
+  <td><span class="pill done">Done</span></td>
+  <td><span class="pill done">Done</span></td>
+  <td><span class="pill done">Done</span></td>
+  <td><span class="pill miss">Miss</span></td>
+  <td><span class="pill open">Open</span></td>
+</tr>
+</tbody>
 
 <tfoot>
-<tr id="tfoot">
-  <th class="sticky-alat"></th>
-  <th class="sticky-site">Jumlah Done</th>
+<tr>
+  <td colspan="2" class="sticky-alat sticky-site">Jumlah Done</td>
+  <td>46</td>
+  <td>38</td>
+  <td>28</td>
+  <td>18</td>
+  <td>23</td>
 </tr>
 </tfoot>
 
@@ -154,102 +184,20 @@ tfoot th {
 </div>
 
 <script>
-/* ===== DATE ===== */
-function weekDates(){
-  const t=new Date(),d=t.getDay(),s=d===0?-6:1-d;
-  return Array.from({length:7},(_,i)=>{
-    const x=new Date(t); x.setDate(t.getDate()+s+i);
-    return {
-      key:x.toISOString().split('T')[0],
-      label:x.toLocaleDateString('id-ID',{day:'numeric',month:'short'})
-    };
-  });
-}
+function sortByDone(colIndex) {
+  const tbody = document.getElementById("tableBody");
+  const rows = Array.from(tbody.rows);
 
-const days = weekDates();
-const thead = document.getElementById('thead');
-const tfoot = document.getElementById('tfoot');
+  rows.sort((a, b) => {
+    const aText = a.cells[colIndex].innerText.trim();
+    const bText = b.cells[colIndex].innerText.trim();
 
-/* ===== BUILD HEADER ===== */
-days.forEach((d,i)=>{
-  thead.insertAdjacentHTML('beforeend',`
-    <th class="col-day">
-      ${d.label}
-      <span class="sort-btn" data-index="${i}">▲</span>
-    </th>
-  `);
-  tfoot.insertAdjacentHTML('beforeend',
-    `<th class="col-day" data-key="${d.key}">—</th>`);
-});
-
-/* ===== DATA ===== */
-let data = [];
-let sortState = {};
-
-fetch('https://script.google.com/macros/s/AKfycbxSwSlCEN9ar6MILTXA5W4p0GkGWbHIp77yXiAACd8Bvoi2eOG48TFtXRvuUt31oFkx/exec')
-.then(r=>r.json())
-.then(j=>{
-  data = j.data;
-  render();
-});
-
-/* ===== SORT WEIGHT ===== */
-function weight(v){
-  if(v==='Done') return 3;
-  if(v==='Open') return 2;
-  if(v==='Miss') return 1;
-  return 0;
-}
-
-/* ===== SORT HANDLER ===== */
-document.querySelectorAll('.sort-btn').forEach(btn=>{
-  btn.onclick=()=>{
-    const i=btn.dataset.index;
-    sortState[i]=!sortState[i];
-
-    document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-
-    data.sort((a,b)=>{
-      const A=weight(a[days[i].key]||'');
-      const B=weight(b[days[i].key]||'');
-      return sortState[i]?B-A:A-B;
-    });
-    render();
-  };
-});
-
-/* ===== RENDER ===== */
-function render(){
-  const tb=document.getElementById('tbody');
-  tb.innerHTML='';
-  const count={};
-
-  data.forEach(r=>{
-    let tr=`
-      <tr>
-        <td class="sticky-alat col-alat">${r.Alat}</td>
-        <td class="sticky-site col-site">${r.Site}</td>
-    `;
-
-    days.forEach(d=>{
-      const v=(r[d.key]||'').trim();
-      if(v==='Done') count[d.key]=(count[d.key]||0)+1;
-
-      tr+=`<td class="col-day">${
-        v==='Done'?'<span class="pill done">Done</span>':
-        v==='Open'?'<span class="pill open">Open</span>':
-        v==='Miss'?'<span class="pill miss">Miss</span>':'—'
-      }</td>`;
-    });
-
-    tr+='</tr>';
-    tb.insertAdjacentHTML('beforeend',tr);
+    if (aText === "Done" && bText !== "Done") return -1;
+    if (aText !== "Done" && bText === "Done") return 1;
+    return 0;
   });
 
-  document.querySelectorAll('tfoot th[data-key]').forEach(th=>{
-    th.textContent=count[th.dataset.key]||'—';
-  });
+  rows.forEach(row => tbody.appendChild(row));
 }
 </script>
 
