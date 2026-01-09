@@ -6,7 +6,6 @@
 <title>Daily Check Teknisi</title>
 
 <style>
-/* ===== BASE ===== */
 body {
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
@@ -20,7 +19,6 @@ h1 {
   font-size: 22px;
 }
 
-/* ===== CARD ===== */
 .card {
   background: white;
   margin: 12px auto;
@@ -29,20 +27,17 @@ h1 {
   max-width: 1200px;
 }
 
-/* ===== LOADING ===== */
 #loading {
   text-align: center;
   padding: 20px;
   font-weight: bold;
 }
 
-/* ===== TABLE WRAPPER (SCROLL CONTAINER) ===== */
 .table-wrapper {
-  overflow: auto;              /* IMPORTANT for sticky header */
-  max-height: 80vh;            /* enables vertical scroll */
+  overflow: auto;
+  max-height: 80vh;
 }
 
-/* ===== TABLE ===== */
 table {
   border-collapse: separate;
   border-spacing: 0;
@@ -52,7 +47,6 @@ table {
   font-size: 14px;
 }
 
-/* ===== CELLS ===== */
 th, td {
   padding: 6px 4px;
   text-align: center;
@@ -60,23 +54,21 @@ th, td {
   white-space: nowrap;
 }
 
-/* ===== FREEZE FIRST ROW ===== */
 thead th {
   position: sticky;
   top: 0;
   background: #f1f3f5;
-  z-index: 100;               /* higher than sticky columns */
+  z-index: 100;
 }
 
-/* ===== STICKY COLUMNS ===== */
 .col-alat {
-  width: 88px;
-  min-width: 88px;
+  width: 96px;
+  min-width: 96px;
 }
 
 .col-site {
-  width: 70px;
-  min-width: 70px;
+  width: 72px;
+  min-width: 72px;
 }
 
 .sticky-alat {
@@ -90,24 +82,22 @@ thead th {
 
 .sticky-site {
   position: sticky;
-  left: 88px;
+  left: 96px;
   background: #fafafa;
   z-index: 85;
 }
 
-/* ===== DATE COLUMNS ===== */
 .date-col {
-  width: 78px;
-  min-width: 78px;
+  width: 70px;
+  min-width: 70px;
 }
 
-/* ===== STATUS PILLS ===== */
 .pill {
   display: inline-block;
-  width: 90%;                 /* 90% of date column */
+  width: 90%;
   padding: 6px 0;
   border-radius: 999px;
-  font-size: 14px;            /* SAME as table text */
+  font-size: 14px;
   font-weight: bold;
 }
 
@@ -115,7 +105,6 @@ thead th {
 .miss { background:#f8d7da; color:#721c24; }
 .open { background:#fff3cd; color:#856404; }
 
-/* ===== SORT ICON ===== */
 .sort-btn {
   font-size: 10px;
   cursor: pointer;
@@ -124,7 +113,6 @@ thead th {
 }
 .sort-btn:hover { opacity: 1; }
 
-/* ===== FOOTER ===== */
 tfoot td {
   position: sticky;
   bottom: 0;
@@ -133,35 +121,12 @@ tfoot td {
   z-index: 80;
 }
 
-/* ===== MOBILE ===== */
 @media (max-width: 768px) {
-
-  table {
-    min-width: 100%;
-  }
-
-  .col-alat {
-    width: 80px;
-    min-width: 80px;
-  }
-
-  .col-site {
-    width: 64px;
-    min-width: 64px;
-  }
-
-  .sticky-site {
-    left: 80px;
-  }
-
-  .date-col {
-    width: 64px;
-    min-width: 64px;
-  }
-
-  .pill {
-    font-size: 14px;
-  }
+  table { min-width: 100%; }
+  .col-alat { width: 88px; }
+  .col-site { width: 64px; }
+  .sticky-site { left: 88px; }
+  .date-col { width: 64px; }
 }
 </style>
 </head>
@@ -175,29 +140,24 @@ tfoot td {
 
 <div class="table-wrapper">
 <table id="dailyTable" style="display:none">
-
 <thead>
 <tr id="headerRow">
-  <th class="col-alat sticky-alat">Alat</th>
-  <th class="col-site sticky-site">Site</th>
+  <th class="sticky-alat col-alat">Alat</th>
+  <th class="sticky-site col-site">Site</th>
 </tr>
 </thead>
-
 <tbody id="tableBody"></tbody>
-
 <tfoot>
 <tr id="footerRow">
   <td class="sticky-alat">Jumlah Done</td>
   <td class="sticky-site"></td>
 </tr>
 </tfoot>
-
 </table>
 </div>
 </div>
 
 <script>
-/* ✅ YOUR REAL GOOGLE APPS SCRIPT WEB APP URL */
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbxSwSlCEN9ar6MILTXA5W4p0GkGWbHIp77yXiAACd8Bvoi2eOG48TFtXRvuUt31oFkx/exec";
 
@@ -224,7 +184,7 @@ const headerRow = document.getElementById("headerRow");
 weekDates.forEach((d, i) => {
   const th = document.createElement("th");
   th.className = "date-col";
-  th.innerHTML = `${d.label} <span class="sort-btn" onclick="sortByDone(${i + 2})">▲</span>`;
+  th.innerHTML = `${d.label}<span class="sort-btn" onclick="sortByDone(${i + 2})">▲</span>`;
   headerRow.appendChild(th);
 });
 
@@ -232,17 +192,24 @@ weekDates.forEach((d, i) => {
 const footerRow = document.getElementById("footerRow");
 weekDates.forEach(() => footerRow.appendChild(document.createElement("td")));
 
-/* ===== LOAD DATA ===== */
-fetch(SCRIPT_URL)
-  .then(r => r.json())
-  .then(json => {
-    buildTable(json.data || []);
+/* ===== SAFE FETCH ===== */
+fetch(SCRIPT_URL + "?t=" + Date.now())
+  .then(res => res.text())
+  .then(text => {
+    let json;
+    try {
+      json = JSON.parse(text);
+    } catch (e) {
+      throw new Error("Web App tidak mengembalikan JSON");
+    }
+    if (!json.data) throw new Error("Field 'data' tidak ditemukan");
+    buildTable(json.data);
     document.getElementById("loading").style.display = "none";
     document.getElementById("dailyTable").style.display = "table";
   })
-  .catch(() => {
+  .catch(err => {
     document.getElementById("loading").innerText =
-      "Gagal memuat data. Periksa Web App URL.";
+      "Gagal memuat data: " + err.message;
   });
 
 function buildTable(data) {
@@ -258,11 +225,11 @@ function buildTable(data) {
     `;
 
     weekDates.forEach(d => {
-      const val = row[d.iso] || "";
+      const val = row[d.iso];
       let html = "—";
       if (val === "Done") html = `<span class="pill done">Done</span>`;
-      else if (val === "Miss") html = `<span class="pill miss">Miss</span>`;
-      else if (val === "Open") html = `<span class="pill open">Open</span>`;
+      if (val === "Miss") html = `<span class="pill miss">Miss</span>`;
+      if (val === "Open") html = `<span class="pill open">Open</span>`;
       tr.innerHTML += `<td class="date-col">${html}</td>`;
     });
 
@@ -272,13 +239,25 @@ function buildTable(data) {
   updateFooter();
 }
 
-/* ===== SORT ===== */
 function sortByDone(col) {
   const tbody = document.getElementById("tableBody");
   const rows = [...tbody.rows];
+  rows.sort((a, b) =>
+    b.cells[col].innerText === "Done" ? 1 : -1
+  );
+  rows.forEach(r => tbody.appendChild(r));
+}
 
-  rows.sort((a, b) => {
-    const A = a.cells[col].innerText.trim();
-    const B = b.cells[col].innerText.trim();
-    if (A === "Done" && B !== "Done") return -1;
-    if (A !== "Done" &
+function updateFooter() {
+  weekDates.forEach((_, i) => {
+    let count = 0;
+    document.querySelectorAll("#tableBody tr").forEach(r => {
+      if (r.cells[i + 2].innerText === "Done") count++;
+    });
+    footerRow.cells[i + 2].innerText = count || "—";
+  });
+}
+</script>
+
+</body>
+</html>
