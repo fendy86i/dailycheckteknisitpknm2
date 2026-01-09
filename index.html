@@ -6,10 +6,10 @@
 <title>Daily Check Teknisi TPKNM2 - Minggu Ini</title>
 
 <style>
-/* ================= BASE ================= */
+/* ========== BASE ========== */
 body {
   margin: 0;
-  padding: 16px 10px;
+  padding: 14px 8px;
   font-family: system-ui, -apple-system, Segoe UI, Arial, sans-serif;
   background: #24084F;
   color: #fff;
@@ -17,82 +17,97 @@ body {
 
 h1 {
   text-align: center;
-  margin-bottom: 14px;
-  font-size: 22px;
+  font-size: 20px;
+  margin-bottom: 12px;
 }
 
-/* ================= CARD ================= */
+/* ========== CARD ========== */
 .card {
   max-width: 1400px;
   margin: auto;
   background: #fff;
   border-radius: 12px;
-  padding: 14px;
+  padding: 12px;
   color: #333;
   box-shadow: 0 6px 24px rgba(0,0,0,.35);
 }
 
-/* ================= SCROLL ================= */
+/* ========== SCROLL ========== */
 .table-wrap {
   overflow-x: auto;
   position: relative;
   -webkit-overflow-scrolling: touch;
 }
 
-/* ================= TABLE ================= */
+/* ========== TABLE ========== */
 table {
   width: 100%;
-  min-width: 920px;
+  min-width: 760px;
   table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
-  background: #fff;
 }
 
+/* Cells */
 th, td {
-  padding: 10px 8px;
+  padding: 8px 6px;
   text-align: center;
   white-space: nowrap;
   border-bottom: 1px solid #e0e0e0;
-  font-size: 14px;
+  font-size: 13px;
 }
 
-/* ================= HEADER ================= */
+/* ========== HEADER (FROZEN ROW) ========== */
 thead th {
   background: #f1f3f5;
   font-weight: 600;
   position: sticky;
   top: 0;
-  z-index: 30;
+  z-index: 40;
 }
 
-/* ================= FOOTER ================= */
+/* Header content */
+.th-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.th-wrap input {
+  font-size: 11px;
+  padding: 3px 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+}
+
+/* ========== FOOTER ========== */
 tfoot th {
   background: #f1f3f5;
   font-weight: 700;
   position: sticky;
   bottom: 0;
-  z-index: 25;
+  z-index: 30;
 }
 
-/* ================= COLUMN WIDTHS ================= */
-.col-alat { width: 140px; min-width: 140px; }
-.col-site { width: 120px; min-width: 120px; }
-.col-day  { width: 110px; }
+/* ========== COLUMN WIDTHS ========== */
+.col-alat { width: 90px; min-width: 90px; }
+.col-site { width: 80px; min-width: 80px; }
+.col-day  { width: 95px; min-width: 95px; }
 
-/* ================= STICKY COLUMNS ================= */
+/* ========== STICKY COLUMNS ========== */
 .sticky-alat {
   position: sticky;
   left: 0;
   background: #fff;
-  z-index: 50;
+  z-index: 60;
 }
 
 .sticky-site {
   position: sticky;
-  left: 140px;
+  left: 90px;
   background: #fff;
-  z-index: 45;
+  z-index: 55;
 }
 
 /* Divider shadow */
@@ -106,23 +121,24 @@ tfoot th {
   background: linear-gradient(to right, rgba(0,0,0,.25), transparent);
 }
 
-/* ================= STATUS PILL ================= */
+/* ========== STATUS PILL ========== */
 .pill {
   display: inline-block;
-  min-width: 72px;
-  padding: 6px 14px;
+  min-width: 64px;
+  padding: 5px 10px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
 }
 
-.done  { background:#d4edda; color:#155724; }
-.miss  { background:#f8d7da; color:#721c24; }
-.open  { background:#fff3cd; color:#856404; }
+.done { background:#d4edda; color:#155724; }
+.miss { background:#f8d7da; color:#721c24; }
+.open { background:#fff3cd; color:#856404; }
 
-/* ================= MOBILE ================= */
-@media (max-width: 768px) {
-  th, td { font-size: 13px; padding: 8px 6px; }
+/* ========== MOBILE TUNING ========== */
+@media (max-width: 480px) {
+  th, td { font-size: 12px; }
+  .pill { min-width: 56px; }
 }
 </style>
 </head>
@@ -137,8 +153,18 @@ tfoot th {
 
 <thead>
 <tr id="head">
-  <th class="col-alat sticky-alat">Alat</th>
-  <th class="col-site sticky-site">Site</th>
+  <th class="col-alat sticky-alat">
+    <div class="th-wrap">
+      <span>Alat</span>
+      <input id="filter-alat" placeholder="Filter">
+    </div>
+  </th>
+  <th class="col-site sticky-site">
+    <div class="th-wrap">
+      <span>Site</span>
+      <input id="filter-site" placeholder="Filter">
+    </div>
+  </th>
 </tr>
 </thead>
 
@@ -156,7 +182,7 @@ tfoot th {
 </div>
 
 <script>
-/* ================= DATE HELPERS ================= */
+/* ===== DATE HELPERS ===== */
 function fmt(d){
   return d.toLocaleDateString('id-ID',{day:'numeric',month:'short'});
 }
@@ -169,7 +195,7 @@ function week(){
   });
 }
 
-/* ================= BUILD TABLE ================= */
+/* ===== BUILD HEADER ===== */
 const days = week();
 const head = document.getElementById('head');
 const foot = document.getElementById('foot');
@@ -181,21 +207,39 @@ days.forEach(d=>{
     `<th class="col-day" data-key="${d.key}">—</th>`);
 });
 
-/* ================= LOAD DATA ================= */
+/* ===== LOAD DATA ===== */
+let allRows = [];
+
 fetch('https://script.google.com/macros/s/AKfycbxSwSlCEN9ar6MILTXA5W4p0GkGWbHIp77yXiAACd8Bvoi2eOG48TFtXRvuUt31oFkx/exec')
 .then(r=>r.json())
 .then(json=>{
-  const data=json.data;
-  const body=document.getElementById('body');
-  const count={};
+  allRows = json.data;
+  render();
+});
 
-  data.forEach(row=>{
-    let tr=`<tr>
-      <td class="sticky-alat col-alat">${row.Alat}</td>
-      <td class="sticky-site col-site">${row.Site}</td>`;
+/* ===== RENDER ===== */
+function render(){
+  const alatF = document.getElementById('filter-alat').value.toLowerCase();
+  const siteF = document.getElementById('filter-site').value.toLowerCase();
+
+  const body = document.getElementById('body');
+  body.innerHTML = '';
+  const count = {};
+
+  allRows
+  .filter(r =>
+    r.Alat.toLowerCase().includes(alatF) &&
+    r.Site.toLowerCase().includes(siteF)
+  )
+  .forEach(r=>{
+    let tr = `
+      <tr>
+        <td class="sticky-alat col-alat">${r.Alat}</td>
+        <td class="sticky-site col-site">${r.Site}</td>
+    `;
 
     days.forEach(d=>{
-      const v=(row[d.key]||'').trim();
+      const v=(r[d.key]||'').trim();
       if(v==='Done'){ count[d.key]=(count[d.key]||0)+1; }
       tr+=`<td class="col-day">${
         v==='Done'?'<span class="pill done">Done</span>':
@@ -209,9 +253,13 @@ fetch('https://script.google.com/macros/s/AKfycbxSwSlCEN9ar6MILTXA5W4p0GkGWbHIp7
   });
 
   document.querySelectorAll('tfoot th[data-key]').forEach(th=>{
-    th.textContent=count[th.dataset.key]||'—';
+    th.textContent = count[th.dataset.key] || '—';
   });
-});
+}
+
+/* ===== FILTER EVENTS ===== */
+document.getElementById('filter-alat').addEventListener('input', render);
+document.getElementById('filter-site').addEventListener('input', render);
 </script>
 
 </body>
