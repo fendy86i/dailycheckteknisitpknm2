@@ -1,130 +1,128 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Daily Check Teknisi TPKNM2 - Minggu Ini</title>
 
-<link rel="stylesheet" href="https://cdn.datatables.net/2.1.5/css/dataTables.dataTables.css"/>
-
 <style>
+/* ================= BASE ================= */
 body {
-    margin: 0;
-    padding: 16px 10px;
-    font-family: system-ui, Arial, sans-serif;
-    background: #24084F;
-    color: white;
+  margin: 0;
+  padding: 16px 10px;
+  font-family: system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+  background: #24084F;
+  color: #fff;
 }
 
 h1 {
-    text-align: center;
-    margin-bottom: 14px;
-    font-size: 22px;
+  text-align: center;
+  margin-bottom: 14px;
+  font-size: 22px;
 }
 
-#table-card {
-    max-width: 1400px;
-    margin: auto;
-    background: #fff;
-    border-radius: 10px;
-    padding: 12px;
-    color: #333;
-    box-shadow: 0 6px 20px rgba(0,0,0,.35);
+/* ================= CARD ================= */
+.card {
+  max-width: 1400px;
+  margin: auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px;
+  color: #333;
+  box-shadow: 0 6px 24px rgba(0,0,0,.35);
 }
 
-/* DataTables spacing fix */
-.dataTables_wrapper {
-    margin-top: 8px;
+/* ================= SCROLL ================= */
+.table-wrap {
+  overflow-x: auto;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Scroll container */
-.table-container {
-    overflow-x: auto;
-    position: relative;
-    -webkit-overflow-scrolling: touch;
-}
-
-/* Table */
+/* ================= TABLE ================= */
 table {
-    width: 100%;
-    min-width: 900px;
-    table-layout: fixed;
-    border-collapse: separate;
-    border-spacing: 0;
-    background: #fff;
+  width: 100%;
+  min-width: 920px;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #fff;
 }
 
 th, td {
-    padding: 10px;
-    text-align: center;
-    white-space: nowrap;
-    border-bottom: 1px solid #e0e0e0;
-    font-size: 14px;
+  padding: 10px 8px;
+  text-align: center;
+  white-space: nowrap;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 14px;
 }
 
-/* Header */
+/* ================= HEADER ================= */
 thead th {
-    background: #f1f3f5;
-    position: sticky;
-    top: 0;
-    z-index: 30;
+  background: #f1f3f5;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 30;
 }
 
-/* Footer */
+/* ================= FOOTER ================= */
 tfoot th {
-    background: #f1f3f5;
-    font-weight: 700;
-    position: sticky;
-    bottom: 0;
-    z-index: 20;
+  background: #f1f3f5;
+  font-weight: 700;
+  position: sticky;
+  bottom: 0;
+  z-index: 25;
 }
 
-/* Column widths */
+/* ================= COLUMN WIDTHS ================= */
 .col-alat { width: 140px; min-width: 140px; }
 .col-site { width: 120px; min-width: 120px; }
+.col-day  { width: 110px; }
 
-/* Frozen columns */
-.sticky-1 {
-    position: sticky;
-    left: 0;
-    z-index: 50;
-    background: #fff;
+/* ================= STICKY COLUMNS ================= */
+.sticky-alat {
+  position: sticky;
+  left: 0;
+  background: #fff;
+  z-index: 50;
 }
 
-.sticky-2 {
-    position: sticky;
-    left: 140px;
-    z-index: 45;
-    background: #fff;
+.sticky-site {
+  position: sticky;
+  left: 140px;
+  background: #fff;
+  z-index: 45;
 }
 
-/* Divider */
-.sticky-2::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: -6px;
-    width: 6px;
-    height: 100%;
-    background: linear-gradient(to right, rgba(0,0,0,0.2), transparent);
+/* Divider shadow */
+.sticky-site::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -6px;
+  width: 6px;
+  height: 100%;
+  background: linear-gradient(to right, rgba(0,0,0,.25), transparent);
 }
 
-/* Pills */
+/* ================= STATUS PILL ================= */
 .pill {
-    display: inline-block;
-    padding: 6px 14px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 700;
-    min-width: 70px;
+  display: inline-block;
+  min-width: 72px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
 }
-.pill-success { background:#d4edda; color:#155724; }
-.pill-danger  { background:#f8d7da; color:#721c24; }
-.pill-warning { background:#fff3cd; color:#856404; }
 
-/* Mobile */
+.done  { background:#d4edda; color:#155724; }
+.miss  { background:#f8d7da; color:#721c24; }
+.open  { background:#fff3cd; color:#856404; }
+
+/* ================= MOBILE ================= */
 @media (max-width: 768px) {
-    th, td { font-size: 13px; padding: 8px; }
+  th, td { font-size: 13px; padding: 8px 6px; }
 }
 </style>
 </head>
@@ -133,21 +131,23 @@ tfoot th {
 
 <h1>Daily Check Teknisi TPKNM2 - Minggu Ini</h1>
 
-<div id="table-card">
-<div class="table-container">
-<table id="dailycheck" class="display">
+<div class="card">
+<div class="table-wrap">
+<table id="table">
 
 <thead>
-<tr id="headerRow">
-    <th class="col-alat sticky-1">Alat</th>
-    <th class="col-site sticky-2">Site</th>
+<tr id="head">
+  <th class="col-alat sticky-alat">Alat</th>
+  <th class="col-site sticky-site">Site</th>
 </tr>
 </thead>
 
+<tbody id="body"></tbody>
+
 <tfoot>
-<tr id="footerRow">
-    <th class="sticky-1"></th>
-    <th class="sticky-2">Jumlah Done</th>
+<tr id="foot">
+  <th class="sticky-alat"></th>
+  <th class="sticky-site">Jumlah Done</th>
 </tr>
 </tfoot>
 
@@ -155,64 +155,62 @@ tfoot th {
 </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/2.1.5/js/dataTables.js"></script>
-
 <script>
-function formatDate(d) {
-    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+/* ================= DATE HELPERS ================= */
+function fmt(d){
+  return d.toLocaleDateString('id-ID',{day:'numeric',month:'short'});
 }
 
-function getWeek() {
-    const t = new Date();
-    const d = t.getDay();
-    const start = d === 0 ? -6 : 1 - d;
-    return Array.from({length:7}, (_,i) => {
-        const x = new Date(t);
-        x.setDate(t.getDate() + start + i);
-        return { label: formatDate(x), key: x.toISOString().split('T')[0] };
-    });
+function week(){
+  const t=new Date(),day=t.getDay(),s=day===0?-6:1-day;
+  return Array.from({length:7},(_,i)=>{
+    const d=new Date(t); d.setDate(t.getDate()+s+i);
+    return {label:fmt(d),key:d.toISOString().split('T')[0]};
+  });
 }
 
-$(function () {
-    const days = getWeek();
+/* ================= BUILD TABLE ================= */
+const days = week();
+const head = document.getElementById('head');
+const foot = document.getElementById('foot');
 
-    days.forEach(d => {
-        $('#headerRow').append(`<th>${d.label}</th>`);
-        $('#footerRow').append('<th>—</th>');
+days.forEach(d=>{
+  head.insertAdjacentHTML('beforeend',
+    `<th class="col-day">${d.label}</th>`);
+  foot.insertAdjacentHTML('beforeend',
+    `<th class="col-day" data-key="${d.key}">—</th>`);
+});
+
+/* ================= LOAD DATA ================= */
+fetch('https://script.google.com/macros/s/AKfycbxSwSlCEN9ar6MILTXA5W4p0GkGWbHIp77yXiAACd8Bvoi2eOG48TFtXRvuUt31oFkx/exec')
+.then(r=>r.json())
+.then(json=>{
+  const data=json.data;
+  const body=document.getElementById('body');
+  const count={};
+
+  data.forEach(row=>{
+    let tr=`<tr>
+      <td class="sticky-alat col-alat">${row.Alat}</td>
+      <td class="sticky-site col-site">${row.Site}</td>`;
+
+    days.forEach(d=>{
+      const v=(row[d.key]||'').trim();
+      if(v==='Done'){ count[d.key]=(count[d.key]||0)+1; }
+      tr+=`<td class="col-day">${
+        v==='Done'?'<span class="pill done">Done</span>':
+        v==='Miss'?'<span class="pill miss">Miss</span>':
+        v==='Open'?'<span class="pill open">Open</span>':'—'
+      }</td>`;
     });
 
-    const table = new DataTable('#dailycheck', {
-        autoWidth: false,
-        scrollX: false,
-        ajax: {
-            url: 'https://script.google.com/macros/s/AKfycbxSwSlCEN9ar6MILTXA5W4p0GkGWbHIp77yXiAACd8Bvoi2eOG48TFtXRvuUt31oFkx/exec',
-            dataSrc: 'data'
-        },
-        columns: [
-            { data: 'Alat', className:'sticky-1 col-alat' },
-            { data: 'Site', className:'sticky-2 col-site' },
-            ...days.map(d => ({ data: d.key }))
-        ],
-        columnDefs: [{
-            targets: '_all',
-            render: (d,t) => {
-                if (t !== 'display') return d || '';
-                if (d === 'Done') return '<span class="pill pill-success">Done</span>';
-                if (d === 'Miss') return '<span class="pill pill-danger">Miss</span>';
-                if (d === 'Open') return '<span class="pill pill-warning">Open</span>';
-                return d || '—';
-            }
-        }],
-        footerCallback: function () {
-            const api = this.api();
-            days.forEach((_, i) => {
-                let c = 0;
-                api.column(i + 2).data().each(v => { if (v === 'Done') c++; });
-                $(api.column(i + 2).footer()).html(c || '—');
-            });
-        }
-    });
+    tr+='</tr>';
+    body.insertAdjacentHTML('beforeend',tr);
+  });
+
+  document.querySelectorAll('tfoot th[data-key]').forEach(th=>{
+    th.textContent=count[th.dataset.key]||'—';
+  });
 });
 </script>
 
