@@ -3,60 +3,44 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Daily Check Teknisi TPKNM2</title>
+<title>Daily Check Teknisi</title>
 
 <style>
-/* ===== BASE ===== */
 body {
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
   background: #24084F;
-  color: #333;
 }
 
 h1 {
-  text-align: center;
   color: white;
-  padding: 16px 8px;
-  margin: 0;
+  text-align: center;
+  padding: 14px;
   font-size: 22px;
 }
 
-/* ===== CARD ===== */
+/* CARD */
 .card {
   background: white;
   margin: 12px;
   padding: 8px;
   border-radius: 10px;
-  overflow: hidden;
 }
 
-/* ===== TABLE WRAPPER ===== */
+/* TABLE */
 .table-wrapper {
   overflow-x: auto;
-  position: relative;
 }
 
-/* ===== TABLE ===== */
 table {
+  width: 100%;
+  min-width: 1000px;
   border-collapse: separate;
   border-spacing: 0;
-  width: 100%;
-  min-width: 900px;
   table-layout: fixed;
   font-size: 14px;
 }
 
-/* ===== HEADER ===== */
-thead th {
-  position: sticky;
-  top: 0;
-  background: #f1f3f5;
-  z-index: 40;
-  border-bottom: 2px solid #ccc;
-}
-
-/* ===== CELLS ===== */
 th, td {
   padding: 6px 4px;
   text-align: center;
@@ -64,12 +48,19 @@ th, td {
   white-space: nowrap;
 }
 
-/* ===== STICKY COLUMNS ===== */
+/* HEADER */
+thead th {
+  position: sticky;
+  top: 0;
+  background: #f1f3f5;
+  z-index: 40;
+}
+
+/* STICKY COLUMNS */
 .col-alat {
   width: 64px;
   min-width: 64px;
 }
-
 .col-site {
   width: 70px;
   min-width: 70px;
@@ -89,115 +80,154 @@ th, td {
   z-index: 55;
 }
 
-/* ===== PILLS ===== */
+/* STATUS */
 .pill {
-  display: inline-block;
   padding: 4px 10px;
   border-radius: 999px;
-  font-weight: 700;
   font-size: 12px;
+  font-weight: bold;
 }
-
 .done { background:#d4edda; color:#155724; }
 .miss { background:#f8d7da; color:#721c24; }
 .open { background:#fff3cd; color:#856404; }
 
-/* ===== SORT BUTTON ===== */
+/* SORT */
 .sort-btn {
-  cursor: pointer;
   font-size: 10px;
-  margin-left: 4px;
-  user-select: none;
+  cursor: pointer;
   opacity: 0.6;
 }
+.sort-btn:hover { opacity: 1; }
 
-.sort-btn:hover {
-  opacity: 1;
-}
-
-/* ===== FOOTER ===== */
+/* FOOTER */
 tfoot td {
   position: sticky;
   bottom: 0;
   background: #f1f3f5;
   font-weight: bold;
-  z-index: 30;
 }
 </style>
 </head>
 
 <body>
 
-<h1>Daily Check Teknisi TPKNM2 - Minggu Ini</h1>
+<h1>Daily Check Teknisi – Minggu Ini</h1>
 
 <div class="card">
 <div class="table-wrapper">
 <table id="dailyTable">
-
 <thead>
-<tr>
+<tr id="headerRow">
   <th class="col-alat sticky-alat">Alat</th>
   <th class="col-site sticky-site">Site</th>
-  <th>6 Jan <span class="sort-btn" onclick="sortByDone(2)">▲</span></th>
-  <th>7 Jan <span class="sort-btn" onclick="sortByDone(3)">▲</span></th>
-  <th>8 Jan <span class="sort-btn" onclick="sortByDone(4)">▲</span></th>
-  <th>9 Jan <span class="sort-btn" onclick="sortByDone(5)">▲</span></th>
-  <th>10 Jan <span class="sort-btn" onclick="sortByDone(6)">▲</span></th>
 </tr>
 </thead>
 
-<tbody id="tableBody">
-<tr>
-  <td class="sticky-alat col-alat">FL01</td>
-  <td class="sticky-site col-site">TPKNM2</td>
-  <td><span class="pill done">Done</span></td>
-  <td><span class="pill miss">Miss</span></td>
-  <td><span class="pill miss">Miss</span></td>
-  <td><span class="pill miss">Miss</span></td>
-  <td><span class="pill open">Open</span></td>
-</tr>
-
-<tr>
-  <td class="sticky-alat col-alat">HT01</td>
-  <td class="sticky-site col-site">TPKNM2</td>
-  <td><span class="pill done">Done</span></td>
-  <td><span class="pill done">Done</span></td>
-  <td><span class="pill done">Done</span></td>
-  <td><span class="pill miss">Miss</span></td>
-  <td><span class="pill open">Open</span></td>
-</tr>
-</tbody>
+<tbody id="tableBody"></tbody>
 
 <tfoot>
-<tr>
+<tr id="footerRow">
   <td colspan="2" class="sticky-alat sticky-site">Jumlah Done</td>
-  <td>46</td>
-  <td>38</td>
-  <td>28</td>
-  <td>18</td>
-  <td>23</td>
 </tr>
 </tfoot>
-
 </table>
 </div>
 </div>
 
 <script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxSwSlCEN9ar6MILTXA5W4p0GkGWbHIp77yXiAACd8Bvoi2eOG48TFtXRvuUt31oFkx/exec";
+
+/* ===== DATE HELPERS ===== */
+function getWeekDates() {
+  const today = new Date();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - (today.getDay() || 7) + 1);
+
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return {
+      label: d.toLocaleDateString("id-ID", { day: "numeric", month: "short" }),
+      iso: d.toISOString().split("T")[0]
+    };
+  });
+}
+
+const weekDates = getWeekDates();
+
+/* ===== BUILD HEADER ===== */
+const headerRow = document.getElementById("headerRow");
+weekDates.forEach((d, i) => {
+  const th = document.createElement("th");
+  th.innerHTML = `${d.label} <span class="sort-btn" onclick="sortByDone(${i + 2})">▲</span>`;
+  headerRow.appendChild(th);
+});
+
+/* ===== BUILD FOOTER ===== */
+const footerRow = document.getElementById("footerRow");
+weekDates.forEach(() => {
+  const td = document.createElement("td");
+  td.textContent = "—";
+  footerRow.appendChild(td);
+});
+
+/* ===== LOAD DATA ===== */
+fetch(SCRIPT_URL)
+  .then(res => res.json())
+  .then(json => buildTable(json.data));
+
+function buildTable(data) {
+  const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = "";
+
+  data.forEach(row => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td class="sticky-alat col-alat">${row.Alat}</td>
+      <td class="sticky-site col-site">${row.Site}</td>
+    `;
+
+    weekDates.forEach(d => {
+      const val = row[d.iso] || "";
+      let html = "—";
+      if (val === "Done") html = `<span class="pill done">Done</span>`;
+      else if (val === "Miss") html = `<span class="pill miss">Miss</span>`;
+      else if (val === "Open") html = `<span class="pill open">Open</span>`;
+      tr.innerHTML += `<td>${html}</td>`;
+    });
+
+    tbody.appendChild(tr);
+  });
+
+  updateFooter();
+}
+
+/* ===== SORT ===== */
 function sortByDone(colIndex) {
   const tbody = document.getElementById("tableBody");
   const rows = Array.from(tbody.rows);
 
   rows.sort((a, b) => {
-    const aText = a.cells[colIndex].innerText.trim();
-    const bText = b.cells[colIndex].innerText.trim();
-
-    if (aText === "Done" && bText !== "Done") return -1;
-    if (aText !== "Done" && bText === "Done") return 1;
+    const A = a.cells[colIndex].innerText.trim();
+    const B = b.cells[colIndex].innerText.trim();
+    if (A === "Done" && B !== "Done") return -1;
+    if (A !== "Done" && B === "Done") return 1;
     return 0;
   });
 
-  rows.forEach(row => tbody.appendChild(row));
+  rows.forEach(r => tbody.appendChild(r));
+}
+
+/* ===== FOOTER COUNT ===== */
+function updateFooter() {
+  weekDates.forEach((_, i) => {
+    let count = 0;
+    document.querySelectorAll(`#tableBody tr`).forEach(r => {
+      if (r.cells[i + 2].innerText.trim() === "Done") count++;
+    });
+    footerRow.cells[i + 1].textContent = count || "—";
+  });
 }
 </script>
 
