@@ -8,19 +8,19 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/2.1.5/css/dataTables.dataTables.css"/>
 
 <style>
-/* ===== Base ===== */
+/* ===== Page ===== */
 body {
     margin: 0;
     padding: 16px 10px;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-    background-color: #24084F;
+    background: #24084F;
     color: white;
 }
 
 h1 {
     text-align: center;
-    font-size: 22px;
     margin-bottom: 16px;
+    font-size: 22px;
 }
 
 /* ===== Card ===== */
@@ -37,8 +37,8 @@ h1 {
 /* ===== Scroll container ===== */
 .table-container {
     overflow-x: auto;
-    position: relative;
     -webkit-overflow-scrolling: touch;
+    position: relative;
 }
 
 /* ===== Table ===== */
@@ -47,7 +47,8 @@ table {
     min-width: 900px;
     border-collapse: separate;
     border-spacing: 0;
-    background: white;
+    table-layout: fixed;
+    background: #fff;
 }
 
 th, td {
@@ -58,60 +59,78 @@ th, td {
     font-size: 14px;
 }
 
-/* ===== Header sticky ===== */
+/* ===== Header ===== */
 thead th {
     background: #f1f3f5;
     font-weight: 600;
     position: sticky;
     top: 0;
-    z-index: 5;
-}
-
-/* ===== Frozen columns ===== */
-th:nth-child(1),
-td:nth-child(1) {
-    position: sticky;
-    left: 0;
-    background: #ffffff;
-    z-index: 6;
-    min-width: 140px;
-}
-
-th:nth-child(2),
-td:nth-child(2) {
-    position: sticky;
-    left: 140px; /* must match column 1 width */
-    background: #ffffff;
-    z-index: 6;
-    min-width: 120px;
-}
-
-/* Shadow divider */
-th:nth-child(2)::after,
-td:nth-child(2)::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: -6px;
-    width: 6px;
-    height: 100%;
-    background: linear-gradient(to right, rgba(0,0,0,0.15), transparent);
+    z-index: 30;
 }
 
 /* ===== Footer ===== */
 tfoot th {
     background: #f1f3f5;
     font-weight: 700;
+    text-align: center;
+    position: sticky;
+    bottom: 0;
+    z-index: 25;
 }
 
-/* ===== Status pills ===== */
+/* ===== Column widths ===== */
+th:nth-child(1), td:nth-child(1), tfoot th:nth-child(1) {
+    width: 140px;
+    min-width: 140px;
+}
+
+th:nth-child(2), td:nth-child(2), tfoot th:nth-child(2) {
+    width: 120px;
+    min-width: 120px;
+}
+
+/* ===== Frozen column 1 ===== */
+th:nth-child(1),
+td:nth-child(1),
+tfoot th:nth-child(1) {
+    position: sticky;
+    left: 0;
+    background: #fff;
+    z-index: 50;
+}
+
+/* ===== Frozen column 2 ===== */
+th:nth-child(2),
+td:nth-child(2),
+tfoot th:nth-child(2) {
+    position: sticky;
+    left: 140px;
+    background: #fff;
+    z-index: 45;
+}
+
+/* ===== Divider shadow ===== */
+th:nth-child(2)::after,
+td:nth-child(2)::after,
+tfoot th:nth-child(2)::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: -6px;
+    width: 6px;
+    height: 100%;
+    background: linear-gradient(to right, rgba(0,0,0,0.18), transparent);
+    pointer-events: none;
+}
+
+/* ===== Pills ===== */
 .pill {
     display: inline-block;
     padding: 6px 14px;
     border-radius: 999px;
     font-size: 12px;
     font-weight: 700;
-    min-width: 70px;
+    min-width: 72px;
 }
 
 .pill-success { background:#d4edda; color:#155724; }
@@ -119,39 +138,9 @@ tfoot th {
 .pill-warning { background:#fff3cd; color:#856404; }
 .pill-secondary { background:#e9ecef; color:#495057; }
 
-/* ===== Loading overlay ===== */
-#loading {
-    position: fixed;
-    inset: 0;
-    background: rgba(36,8,79,.95);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    font-size: 18px;
-}
-
-#loading::after {
-    content: "";
-    width: 36px;
-    height: 36px;
-    border: 4px solid #ccc;
-    border-top: 4px solid #fff;
-    border-radius: 50%;
-    margin-top: 14px;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* ===== Mobile tweaks ===== */
+/* ===== Mobile ===== */
 @media (max-width: 768px) {
-    h1 { font-size: 18px; }
     th, td { font-size: 13px; padding: 8px 10px; }
-    .pill { font-size: 11px; padding: 5px 10px; }
 }
 </style>
 </head>
@@ -160,24 +149,25 @@ tfoot th {
 
 <h1>Daily Check Teknisi TPKNM2 - Minggu Ini</h1>
 
-<div id="loading">Memuat data minggu ini…</div>
-
 <div id="table-card">
-    <div class="table-container">
-        <table id="dailycheck" class="display">
-            <thead>
-                <tr id="headerRow">
-                    <th>Alat</th>
-                    <th>Site</th>
-                </tr>
-            </thead>
-            <tfoot>
-                <tr>
-                    <th colspan="2" style="text-align:right;">Jumlah Done:</th>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
+<div class="table-container">
+<table id="dailycheck" class="display">
+
+<thead>
+<tr id="headerRow">
+    <th>Alat</th>
+    <th>Site</th>
+</tr>
+</thead>
+
+<tfoot>
+<tr>
+    <th colspan="2" style="text-align:right;">Jumlah Done</th>
+</tr>
+</tfoot>
+
+</table>
+</div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -206,15 +196,17 @@ $(function () {
     weekDates.forEach(() => $('tfoot tr').append('<th>—</th>'));
 
     const table = new DataTable('#dailycheck', {
+        autoWidth: false,
+        scrollX: false,
         ajax: {
             url: 'https://script.google.com/macros/s/AKfycbxSwSlCEN9ar6MILTXA5W4p0GkGWbHIp77yXiAACd8Bvoi2eOG48TFtXRvuUt31oFkx/exec',
             dataSrc: 'data',
             cache: false
         },
         columns: [
-            { data: 'Alat' },
-            { data: 'Site' },
-            ...weekDates.map(d => ({ data: d.iso, defaultContent: '—' }))
+            { data: 'Alat', width: '140px' },
+            { data: 'Site', width: '120px' },
+            ...weekDates.map(d => ({ data: d.iso }))
         ],
         columnDefs: [{
             targets: '_all',
@@ -236,13 +228,13 @@ $(function () {
             const api = this.api();
             weekDates.forEach((_, i) => {
                 let count = 0;
-                api.column(i + 2).data().each(v => { if ((v || '').trim() === 'Done') count++; });
+                api.column(i + 2).data().each(v => {
+                    if ((v || '').trim() === 'Done') count++;
+                });
                 $(api.column(i + 2).footer()).html(count || '—');
             });
         }
     });
-
-    table.on('xhr', () => $('#loading').hide());
 });
 </script>
 
