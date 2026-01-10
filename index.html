@@ -5,151 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Daily Check Teknisi</title>
 
-<style>
-body {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background: #24084F;
-}
-
-h1 {
-  color: white;
-  text-align: center;
-  padding-top: 14px;
-  margin-bottom: 10px;
-  font-size: 22px;
-}
-
-.card {
-  background: white;
-  margin: 10px auto;
-  padding: 8px;
-  border-radius: 10px;
-  max-width: 1200px;
-}
-
-#loading {
-  text-align: center;
-  padding: 16px;
-  font-weight: bold;
-}
-
-.table-wrapper {
-  overflow: auto;
-  max-height: 72vh;
-}
-
-table {
-  border-collapse: separate;
-  border-spacing: 0;
-  table-layout: fixed;
-  width: 100%;
-  min-width: 920px;
-  font-size: 14px;
-}
-
-th, td {
-  padding: 6px 4px;
-  text-align: center;
-  border-bottom: 1px solid #ddd;
-  white-space: nowrap;
-}
-
-thead th {
-  position: sticky;
-  top: 0;
-  background: #f1f3f5;
-  z-index: 100;
-}
-
-.col-alat {
-  width: 108px;
-  min-width: 108px;
-}
-
-.col-site {
-  width: 72px;
-  min-width: 72px;
-}
-
-.sticky-alat {
-  position: sticky;
-  left: 0;
-  background: #fafafa;
-  z-index: 90;
-  text-align: left;
-  padding-left: 8px;
-}
-
-.sticky-site {
-  position: sticky;
-  left: 108px;
-  background: #fafafa;
-  z-index: 85;
-}
-
-.date-col {
-  width: 70px;
-  min-width: 70px;
-}
-
-.pill {
-  display: inline-block;
-  width: 90%;
-  padding: 6px 0;
-  border-radius: 999px;
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.done { background:#d4edda; color:#155724; }
-.miss { background:#f8d7da; color:#721c24; }
-.open { background:#fff3cd; color:#856404; }
-
-tfoot td {
-  position: sticky;
-  bottom: 0;
-  background: #f1f3f5;
-  font-weight: bold;
-  z-index: 80;
-}
-
-/* ===== BOTTOM NAV ===== */
-.nav-bottom {
-  display: flex;
-  justify-content: center;
-  gap: 22px;
-  padding: 12px 0 4px;
-}
-
-.nav-bottom button {
-  border: none;
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  font-size: 20px;
-  font-weight: bold;
-  cursor: pointer;
-  background: #24084F;
-  color: #ffffff;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.35);
-}
-
-@media (max-width: 768px) {
-  table { min-width: 100%; }
-
-  .col-alat { width: 100px; }
-  .col-site { width: 64px; }
-  .sticky-site { left: 100px; }
-  .date-col { width: 64px; }
-
-  .nav-bottom button {
-    width: 54px;
-    height: 54px;
-    font-size: 22px;
-  }
-}
-</style>
+<!-- ✅ External CSS -->
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -180,7 +37,7 @@ tfoot td {
 </table>
 </div>
 
-<!-- 🔽 NAVIGATION MOVED HERE -->
+<!-- 🔽 Navigation BELOW table -->
 <div class="nav-bottom">
   <button onclick="shiftDay(-1)">◀</button>
   <button onclick="shiftDay(1)">▶</button>
