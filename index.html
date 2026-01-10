@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Daily Check Teknisi</title>
 
+<!-- ✅ External CSS -->
 <link rel="stylesheet" href="style.css">
 </head>
 
@@ -36,6 +37,7 @@
 </table>
 </div>
 
+<!-- 🔽 Navigation BELOW table -->
 <div class="nav-bottom">
   <button onclick="shiftDay(-1)">◀</button>
   <button onclick="shiftDay(1)">▶</button>
@@ -52,8 +54,6 @@ startDate.setHours(0,0,0,0);
 
 let dateWindow = [];
 let cachedData = [];
-let originalOrder = [];
-let sortState = {}; // { isoDate: true/false }
 
 function buildDateWindow() {
   dateWindow = Array.from({ length: 7 }, (_, i) => {
@@ -72,16 +72,10 @@ function buildHeaderFooter() {
     <th class="sticky-alat col-alat">Alat</th>
     <th class="sticky-site col-site">Site</th>
   `;
-
   dateWindow.forEach(d => {
     const th = document.createElement("th");
-    th.className = "date-col sortable";
-    th.innerHTML = `
-      <div class="header-flex">
-        <span>${d.label}</span>
-        <button class="sort-btn" onclick="sortByDate('${d.iso}')">▲</button>
-      </div>
-    `;
+    th.className = "date-col";
+    th.textContent = d.label;
     headerRow.appendChild(th);
   });
 
@@ -97,7 +91,6 @@ fetch(SCRIPT_URL + "?t=" + Date.now())
   .then(r => r.text())
   .then(text => {
     cachedData = JSON.parse(text).data || [];
-    originalOrder = [...cachedData];
     document.getElementById("loading").style.display = "none";
     document.getElementById("dailyTable").style.display = "table";
     render();
@@ -146,26 +139,6 @@ function updateFooter() {
     });
     document.getElementById("footerRow").cells[i + 2].textContent = count || "—";
   });
-}
-
-/* 🔽 SORTING LOGIC */
-function sortByDate(iso) {
-  const isSorted = sortState[iso];
-
-  if (!isSorted) {
-    cachedData.sort((a, b) => {
-      const av = a[iso] === "Done" ? 1 : 0;
-      const bv = b[iso] === "Done" ? 1 : 0;
-      return bv - av;
-    });
-  } else {
-    cachedData = [...originalOrder];
-  }
-
-  sortState = {};
-  sortState[iso] = !isSorted;
-
-  buildTable();
 }
 
 function shiftDay(delta) {
