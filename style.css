@@ -4,29 +4,28 @@
 }
 
 body {
-  background: linear-gradient(135deg,#2a0057,#14002e);
   margin: 0;
   padding: 16px;
+  background: linear-gradient(135deg,#2a0057,#14002e);
 }
 
 h1 {
-  color: #fff;
+  color: white;
   text-align: center;
   margin-bottom: 12px;
 }
 
 .card {
-  background: #fff;
+  background: white;
   border-radius: 18px;
   padding: 12px;
   max-width: 1400px;
   margin: auto;
 }
 
-/* ===== TABLE WRAPPER ===== */
 .table-wrapper {
-  overflow: auto;
   max-height: 70vh;
+  overflow: auto;
 }
 
 /* ===== TABLE ===== */
@@ -42,15 +41,15 @@ table {
   position: sticky;
   top: 0;
   background: #f5f5f5;
-  z-index: 20;
+  z-index: 30;
 }
 
 /* ===== STICKY FOOTER ===== */
 .sticky-footer {
   position: sticky;
   bottom: 0;
-  background: #fff;
-  z-index: 18;
+  background: white;
+  z-index: 25;
   border-top: 2px solid #ddd;
 }
 
@@ -58,31 +57,29 @@ table {
 .sticky-alat {
   position: sticky;
   left: 0;
-  background: #fff;
-  z-index: 30;
+  background: white;
+  z-index: 40;
 }
 
 .sticky-site {
   position: sticky;
   left: 120px;
-  background: #fff;
-  z-index: 29;
+  background: white;
+  z-index: 39;
 }
 
-/* ===== COMBINED STICKY (HEADER + COL) ===== */
+/* ===== INTERSECTION FIX ===== */
 thead .sticky-alat,
 thead .sticky-site {
   top: 0;
-  z-index: 40;
 }
 
 tfoot .sticky-alat,
 tfoot .sticky-site {
   bottom: 0;
-  z-index: 35;
 }
 
-/* ===== COLUMN WIDTHS ===== */
+/* ===== COLUMN WIDTH ===== */
 .col-alat { width: 120px; }
 .col-site { width: 140px; }
 .date-col { width: 110px; }
@@ -94,11 +91,11 @@ th, td {
   border-bottom: 1px solid #e0e0e0;
 }
 
-/* ===== HEADER CONTENT ===== */
+/* ===== HEADER ===== */
 .header-wrap {
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   gap: 6px;
 }
 
@@ -106,42 +103,31 @@ th, td {
   border: 1px solid #aaa;
   background: #eee;
   border-radius: 6px;
-  padding: 2px 6px;
   font-size: 12px;
+  padding: 2px 6px;
   cursor: pointer;
 }
 
-/* ===== STATUS PILLS ===== */
+/* ===== PILLS ===== */
 .pill {
-  display: inline-block;
   width: 90%;
   padding: 6px 0;
   border-radius: 999px;
   font-weight: 700;
 }
 
-.done {
-  background: #d6f0dd;
-  color: #0f5c1f;
-}
+.done { background:#d6f0dd; color:#0f5c1f; }
+.miss { background:#f9dada; color:#7a1b1b; }
+.open { background:#fff0c2; color:#8a6a00; }
 
-.miss {
-  background: #f9dada;
-  color: #7a1b1b;
-}
-
-.open {
-  background: #fff0c2;
-  color: #8a6a00;
-}
-
-/* ===== FOOTER LABEL ===== */
+/* ===== FOOTER ===== */
 .jumlah-label {
   text-align: left;
-  padding-left: 16px;
+  padding-left: 14px;
+  font-weight: bold;
 }
 
-/* ===== NAVIGATION ===== */
+/* ===== NAV ===== */
 .nav-bottom {
   display: flex;
   justify-content: center;
@@ -154,16 +140,10 @@ th, td {
   height: 56px;
   border-radius: 50%;
   border: none;
-  background: #fff;
+  background: white;
   font-size: 22px;
-  font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-  transition: transform .15s ease;
-}
-
-.nav-circle:hover {
-  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,.25);
 }
 
 /* ===== LOADING ===== */
