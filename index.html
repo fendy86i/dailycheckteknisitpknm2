@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Daily Check Teknisi</title>
-
 <link rel="stylesheet" href="style.css">
 </head>
 
@@ -43,23 +42,42 @@
 const SCRIPT_URL =
 "https://script.google.com/macros/s/AKfycbxSwSlCEN9ar6MILTXA5W4p0GkGWbHIp77yXiAACd8Bvoi2eOG48TFtXRvuUt31oFkx/exec";
 
-let startDate = new Date();
-startDate.setHours(0,0,0,0);
+/* ===== LOCAL DATE UTIL ===== */
+function localISO(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
 
+/* ===== TODAY (LOCAL MIDNIGHT) ===== */
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+let startDate = new Date(today);
 let cachedData = [];
 let originalOrder = [];
 let dateWindow = [];
 let sortState = {};
 
 function buildDateWindow() {
-  dateWindow = Array.from({ length: 7 }, (_, i) => {
+  dateWindow = [];
+
+  for (let i = 0; i < 7; i++) {
     const d = new Date(startDate);
     d.setDate(startDate.getDate() + i);
-    return {
-      label: d.toLocaleDateString("id-ID", { day: "numeric", month: "short" }),
-      iso: d.toISOString().split("T")[0]
-    };
-  });
+
+    // ⛔ Prevent future dates
+    if (d > today) break;
+
+    dateWindow.push({
+      label: d.toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "short"
+      }),
+      iso: localISO(d)
+    });
+  }
 }
 
 function header(label, key, type) {
@@ -90,6 +108,7 @@ function buildHeaderFooter() {
     <th class="sticky-footer sticky-alat jumlah-label">Jumlah Done</th>
     <th class="sticky-footer sticky-site"></th>
   `;
+
   dateWindow.forEach(() => {
     const td = document.createElement("td");
     td.className = "sticky-footer date-col";
@@ -146,12 +165,12 @@ function updateFooter() {
     document.querySelectorAll("#tableBody tr").forEach(r => {
       if (r.cells[i + 2].innerText === "Done") c++;
     });
-    document.getElementById("footerRow").cells[i + 2].textContent = c || "—";
+    footerRow.cells[i + 2].textContent = c || "—";
   });
 }
 
 function sortColumn(key, type, btn) {
-  const s = (sortState[key] ?? 0);
+  const s = sortState[key] ?? 0;
   sortState = {};
   sortState[key] = (s + 1) % 3;
 
@@ -184,7 +203,11 @@ function sortColumn(key, type, btn) {
 }
 
 function shiftDay(d) {
-  startDate.setDate(startDate.getDate() + d);
+  const next = new Date(startDate);
+  next.setDate(next.getDate() + d);
+
+  if (next > today) return; // ⛔ block future navigation
+  startDate = next;
   render();
 }
 </script>
