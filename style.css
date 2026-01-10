@@ -1,3 +1,7 @@
+/* =========================
+   GLOBAL
+========================= */
+
 body {
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
@@ -11,6 +15,10 @@ h1 {
   font-size: 22px;
 }
 
+/* =========================
+   CARD / LAYOUT
+========================= */
+
 .card {
   background: white;
   margin: 10px auto;
@@ -19,10 +27,21 @@ h1 {
   max-width: 1200px;
 }
 
+#loading {
+  text-align: center;
+  padding: 16px;
+  font-weight: bold;
+}
+
 .table-wrapper {
   overflow: auto;
   max-height: 72vh;
+  -webkit-overflow-scrolling: touch;
 }
+
+/* =========================
+   TABLE BASE
+========================= */
 
 table {
   border-collapse: separate;
@@ -30,35 +49,50 @@ table {
   table-layout: fixed;
   width: 100%;
   min-width: 920px;
+  font-size: 14px;
+  color: #333;
 }
 
 th, td {
-  padding: 6px 4px;
+  padding: 6px 6px;
   text-align: center;
   border-bottom: 1px solid #ddd;
   white-space: nowrap;
+  background: white;
 }
 
-.sticky-top {
+/* =========================
+   STICKY HEADER (ROW 1)
+========================= */
+
+thead th {
   position: sticky;
   top: 0;
   background: #f1f3f5;
   z-index: 120;
 }
 
+/* =========================
+   STICKY FIRST 2 COLUMNS
+========================= */
+
 .col-alat {
   width: 110px;
+  min-width: 110px;
+  max-width: 110px;
 }
 
 .col-site {
   width: 72px;
+  min-width: 72px;
+  max-width: 72px;
 }
 
 .sticky-alat {
   position: sticky;
   left: 0;
   background: #fafafa;
-  z-index: 110;
+  z-index: 130;
   text-align: left;
   padding-left: 8px;
 }
@@ -67,36 +101,47 @@ th, td {
   position: sticky;
   left: 110px;
   background: #fafafa;
-  z-index: 105;
+  z-index: 125;
 }
+
+/* =========================
+   DATE COLUMNS
+========================= */
 
 .date-col {
   width: 70px;
+  min-width: 70px;
+  max-width: 70px;
 }
+
+/* =========================
+   HEADER CONTENT + SORT
+========================= */
 
 .header-wrap {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 6px;
 }
 
-.sort-stack {
-  display: flex;
-  flex-direction: column;
-}
-
-.sort-stack button {
+.sort-one {
   border: none;
   background: none;
-  font-size: 11px;
-  line-height: 1;
-  padding: 0;
   cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0 2px;
+  color: #555;
 }
 
-.sort-stack button:hover {
+.sort-one:hover {
   color: #000;
 }
+
+/* =========================
+   STATUS PILLS
+========================= */
 
 .pill {
   display: inline-block;
@@ -107,16 +152,36 @@ th, td {
   font-weight: bold;
 }
 
-.done { background:#d4edda; color:#155724; }
-.miss { background:#f8d7da; color:#721c24; }
-.open { background:#fff3cd; color:#856404; }
+.done {
+  background: #d4edda;
+  color: #155724;
+}
+
+.miss {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.open {
+  background: #fff3cd;
+  color: #856404;
+}
+
+/* =========================
+   FOOTER (JUMLAH DONE)
+========================= */
 
 tfoot td {
   position: sticky;
   bottom: 0;
   background: #f1f3f5;
   font-weight: bold;
+  z-index: 110;
 }
+
+/* =========================
+   NAVIGATION BUTTONS
+========================= */
 
 .nav-bottom {
   display: flex;
@@ -133,11 +198,51 @@ tfoot td {
   background: #24084F;
   color: white;
   font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.35);
 }
 
+.nav-bottom button:active {
+  transform: scale(0.95);
+}
+
+/* =========================
+   MOBILE OPTIMIZATION
+========================= */
+
 @media (max-width: 768px) {
-  table { min-width: 100%; }
-  .col-alat { width: 100px; }
-  .col-site { width: 64px; }
-  .sticky-site { left: 100px; }
+
+  table {
+    min-width: 100%;
+    font-size: 13px;
+  }
+
+  .col-alat {
+    width: 100px;
+    min-width: 100px;
+    max-width: 100px;
+  }
+
+  .col-site {
+    width: 64px;
+    min-width: 64px;
+    max-width: 64px;
+  }
+
+  .sticky-site {
+    left: 100px;
+  }
+
+  .date-col {
+    width: 64px;
+    min-width: 64px;
+    max-width: 64px;
+  }
+
+  .nav-bottom button {
+    width: 54px;
+    height: 54px;
+    font-size: 22px;
+  }
 }
