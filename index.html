@@ -16,36 +16,10 @@ h1 {
   color: white;
   text-align: center;
   padding-top: 14px;
-  margin-bottom: 6px;
+  margin-bottom: 10px;
   font-size: 22px;
 }
 
-/* ===== WEEK NAV ===== */
-.nav {
-  display: flex;
-  justify-content: center;
-  gap: 14px;
-  margin-bottom: 8px;
-}
-
-.nav button {
-  border: none;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  font-size: 18px;
-  font-weight: bold;
-  cursor: pointer;
-  background: #ffffff;
-  color: #24084F;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-}
-
-.nav button:active {
-  transform: scale(0.95);
-}
-
-/* ===== CARD ===== */
 .card {
   background: white;
   margin: 10px auto;
@@ -60,10 +34,9 @@ h1 {
   font-weight: bold;
 }
 
-/* ===== TABLE ===== */
 .table-wrapper {
   overflow: auto;
-  max-height: 78vh;
+  max-height: 72vh;
 }
 
 table {
@@ -82,7 +55,6 @@ th, td {
   white-space: nowrap;
 }
 
-/* ===== STICKY HEADER ===== */
 thead th {
   position: sticky;
   top: 0;
@@ -90,10 +62,9 @@ thead th {
   z-index: 100;
 }
 
-/* ===== STICKY COLUMNS ===== */
 .col-alat {
-  width: 100px;
-  min-width: 100px;
+  width: 108px;
+  min-width: 108px;
 }
 
 .col-site {
@@ -112,18 +83,16 @@ thead th {
 
 .sticky-site {
   position: sticky;
-  left: 100px;
+  left: 108px;
   background: #fafafa;
   z-index: 85;
 }
 
-/* ===== DATE ===== */
 .date-col {
   width: 70px;
   min-width: 70px;
 }
 
-/* ===== STATUS ===== */
 .pill {
   display: inline-block;
   width: 90%;
@@ -137,7 +106,6 @@ thead th {
 .miss { background:#f8d7da; color:#721c24; }
 .open { background:#fff3cd; color:#856404; }
 
-/* ===== FOOTER ===== */
 tfoot td {
   position: sticky;
   bottom: 0;
@@ -146,13 +114,40 @@ tfoot td {
   z-index: 80;
 }
 
-/* ===== MOBILE ===== */
+/* ===== BOTTOM NAV ===== */
+.nav-bottom {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  padding: 12px 0 4px;
+}
+
+.nav-bottom button {
+  border: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  background: #24084F;
+  color: #ffffff;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+}
+
 @media (max-width: 768px) {
   table { min-width: 100%; }
-  .col-alat { width: 92px; }
+
+  .col-alat { width: 100px; }
   .col-site { width: 64px; }
-  .sticky-site { left: 92px; }
+  .sticky-site { left: 100px; }
   .date-col { width: 64px; }
+
+  .nav-bottom button {
+    width: 54px;
+    height: 54px;
+    font-size: 22px;
+  }
 }
 </style>
 </head>
@@ -161,12 +156,8 @@ tfoot td {
 
 <h1>Daily Check Teknisi</h1>
 
-<div class="nav">
-  <button onclick="changeWeek(-1)">◀</button>
-  <button onclick="changeWeek(1)">▶</button>
-</div>
-
 <div class="card">
+
 <div id="loading">Memuat data...</div>
 
 <div class="table-wrapper">
@@ -188,23 +179,29 @@ tfoot td {
 </tfoot>
 </table>
 </div>
+
+<!-- 🔽 NAVIGATION MOVED HERE -->
+<div class="nav-bottom">
+  <button onclick="shiftDay(-1)">◀</button>
+  <button onclick="shiftDay(1)">▶</button>
+</div>
+
 </div>
 
 <script>
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbxSwSlCEN9ar6MILTXA5W4p0GkGWbHIp77yXiAACd8Bvoi2eOG48TFtXRvuUt31oFkx/exec";
 
-let weekOffset = 0;
-let weekDates = [];
+let startDate = new Date();
+startDate.setHours(0,0,0,0);
 
-function getWeekDates(offset = 0) {
-  const today = new Date();
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - (today.getDay() || 7) + 1 + offset * 7);
+let dateWindow = [];
+let cachedData = [];
 
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
+function buildDateWindow() {
+  dateWindow = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(startDate);
+    d.setDate(startDate.getDate() + i);
     return {
       label: d.toLocaleDateString("id-ID", { day: "numeric", month: "short" }),
       iso: d.toISOString().split("T")[0]
@@ -212,13 +209,13 @@ function getWeekDates(offset = 0) {
   });
 }
 
-function buildHeader() {
+function buildHeaderFooter() {
   const headerRow = document.getElementById("headerRow");
   headerRow.innerHTML = `
     <th class="sticky-alat col-alat">Alat</th>
     <th class="sticky-site col-site">Site</th>
   `;
-  weekDates.forEach(d => {
+  dateWindow.forEach(d => {
     const th = document.createElement("th");
     th.className = "date-col";
     th.textContent = d.label;
@@ -230,37 +227,39 @@ function buildHeader() {
     <td class="sticky-alat">Jumlah Done</td>
     <td class="sticky-site"></td>
   `;
-  weekDates.forEach(() => footerRow.appendChild(document.createElement("td")));
+  dateWindow.forEach(() => footerRow.appendChild(document.createElement("td")));
 }
 
-function loadData() {
-  document.getElementById("loading").style.display = "block";
-  document.getElementById("dailyTable").style.display = "none";
+fetch(SCRIPT_URL + "?t=" + Date.now())
+  .then(r => r.text())
+  .then(text => {
+    cachedData = JSON.parse(text).data || [];
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("dailyTable").style.display = "table";
+    render();
+  })
+  .catch(() => {
+    document.getElementById("loading").innerText = "Gagal memuat data";
+  });
 
-  fetch(SCRIPT_URL + "?t=" + Date.now())
-    .then(r => r.text())
-    .then(text => {
-      const json = JSON.parse(text);
-      buildTable(json.data || []);
-      document.getElementById("loading").style.display = "none";
-      document.getElementById("dailyTable").style.display = "table";
-    })
-    .catch(() => {
-      document.getElementById("loading").innerText = "Gagal memuat data";
-    });
+function render() {
+  buildDateWindow();
+  buildHeaderFooter();
+  buildTable();
 }
 
-function buildTable(data) {
+function buildTable() {
   const tbody = document.getElementById("tableBody");
   tbody.innerHTML = "";
 
-  data.forEach(row => {
+  cachedData.forEach(row => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td class="sticky-alat col-alat">${row.Alat || ""}</td>
       <td class="sticky-site col-site">${row.Site || ""}</td>
     `;
-    weekDates.forEach(d => {
+
+    dateWindow.forEach(d => {
       const val = row[d.iso];
       let html = "—";
       if (val === "Done") html = `<span class="pill done">Done</span>`;
@@ -268,6 +267,7 @@ function buildTable(data) {
       if (val === "Open") html = `<span class="pill open">Open</span>`;
       tr.innerHTML += `<td class="date-col">${html}</td>`;
     });
+
     tbody.appendChild(tr);
   });
 
@@ -275,7 +275,7 @@ function buildTable(data) {
 }
 
 function updateFooter() {
-  weekDates.forEach((_, i) => {
+  dateWindow.forEach((_, i) => {
     let count = 0;
     document.querySelectorAll("#tableBody tr").forEach(r => {
       if (r.cells[i + 2].innerText === "Done") count++;
@@ -284,17 +284,10 @@ function updateFooter() {
   });
 }
 
-function changeWeek(delta) {
-  weekOffset += delta;
-  weekDates = getWeekDates(weekOffset);
-  buildHeader();
-  loadData();
+function shiftDay(delta) {
+  startDate.setDate(startDate.getDate() + delta);
+  render();
 }
-
-/* INIT */
-weekDates = getWeekDates(0);
-buildHeader();
-loadData();
 </script>
 
 </body>
