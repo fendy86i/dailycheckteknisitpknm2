@@ -15,13 +15,40 @@ body {
 h1 {
   color: white;
   text-align: center;
-  padding: 14px;
+  padding-top: 14px;
+  margin-bottom: 6px;
   font-size: 22px;
 }
 
+/* ===== WEEK NAV ===== */
+.nav {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.nav button {
+  border: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  background: #ffffff;
+  color: #24084F;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+
+.nav button:active {
+  transform: scale(0.95);
+}
+
+/* ===== CARD ===== */
 .card {
   background: white;
-  margin: 12px auto;
+  margin: 10px auto;
   padding: 8px;
   border-radius: 10px;
   max-width: 1200px;
@@ -29,13 +56,14 @@ h1 {
 
 #loading {
   text-align: center;
-  padding: 20px;
+  padding: 16px;
   font-weight: bold;
 }
 
+/* ===== TABLE ===== */
 .table-wrapper {
   overflow: auto;
-  max-height: 80vh;
+  max-height: 78vh;
 }
 
 table {
@@ -54,6 +82,7 @@ th, td {
   white-space: nowrap;
 }
 
+/* ===== STICKY HEADER ===== */
 thead th {
   position: sticky;
   top: 0;
@@ -61,9 +90,10 @@ thead th {
   z-index: 100;
 }
 
+/* ===== STICKY COLUMNS ===== */
 .col-alat {
-  width: 96px;
-  min-width: 96px;
+  width: 100px;
+  min-width: 100px;
 }
 
 .col-site {
@@ -82,16 +112,18 @@ thead th {
 
 .sticky-site {
   position: sticky;
-  left: 96px;
+  left: 100px;
   background: #fafafa;
   z-index: 85;
 }
 
+/* ===== DATE ===== */
 .date-col {
   width: 70px;
   min-width: 70px;
 }
 
+/* ===== STATUS ===== */
 .pill {
   display: inline-block;
   width: 90%;
@@ -105,14 +137,7 @@ thead th {
 .miss { background:#f8d7da; color:#721c24; }
 .open { background:#fff3cd; color:#856404; }
 
-.sort-btn {
-  font-size: 10px;
-  cursor: pointer;
-  margin-left: 4px;
-  opacity: 0.6;
-}
-.sort-btn:hover { opacity: 1; }
-
+/* ===== FOOTER ===== */
 tfoot td {
   position: sticky;
   bottom: 0;
@@ -121,11 +146,12 @@ tfoot td {
   z-index: 80;
 }
 
+/* ===== MOBILE ===== */
 @media (max-width: 768px) {
   table { min-width: 100%; }
-  .col-alat { width: 88px; }
+  .col-alat { width: 92px; }
   .col-site { width: 64px; }
-  .sticky-site { left: 88px; }
+  .sticky-site { left: 92px; }
   .date-col { width: 64px; }
 }
 </style>
@@ -133,7 +159,12 @@ tfoot td {
 
 <body>
 
-<h1>Daily Check Teknisi – Minggu Ini</h1>
+<h1>Daily Check Teknisi</h1>
+
+<div class="nav">
+  <button onclick="changeWeek(-1)">◀</button>
+  <button onclick="changeWeek(1)">▶</button>
+</div>
 
 <div class="card">
 <div id="loading">Memuat data...</div>
@@ -146,7 +177,9 @@ tfoot td {
   <th class="sticky-site col-site">Site</th>
 </tr>
 </thead>
+
 <tbody id="tableBody"></tbody>
+
 <tfoot>
 <tr id="footerRow">
   <td class="sticky-alat">Jumlah Done</td>
@@ -161,11 +194,13 @@ tfoot td {
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbxSwSlCEN9ar6MILTXA5W4p0GkGWbHIp77yXiAACd8Bvoi2eOG48TFtXRvuUt31oFkx/exec";
 
-/* ===== WEEK DATES ===== */
-function getWeekDates() {
+let weekOffset = 0;
+let weekDates = [];
+
+function getWeekDates(offset = 0) {
   const today = new Date();
   const monday = new Date(today);
-  monday.setDate(today.getDate() - (today.getDay() || 7) + 1);
+  monday.setDate(today.getDate() - (today.getDay() || 7) + 1 + offset * 7);
 
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(monday);
@@ -177,40 +212,43 @@ function getWeekDates() {
   });
 }
 
-const weekDates = getWeekDates();
-
-/* ===== HEADER ===== */
-const headerRow = document.getElementById("headerRow");
-weekDates.forEach((d, i) => {
-  const th = document.createElement("th");
-  th.className = "date-col";
-  th.innerHTML = `${d.label}<span class="sort-btn" onclick="sortByDone(${i + 2})">▲</span>`;
-  headerRow.appendChild(th);
-});
-
-/* ===== FOOTER ===== */
-const footerRow = document.getElementById("footerRow");
-weekDates.forEach(() => footerRow.appendChild(document.createElement("td")));
-
-/* ===== SAFE FETCH ===== */
-fetch(SCRIPT_URL + "?t=" + Date.now())
-  .then(res => res.text())
-  .then(text => {
-    let json;
-    try {
-      json = JSON.parse(text);
-    } catch (e) {
-      throw new Error("Web App tidak mengembalikan JSON");
-    }
-    if (!json.data) throw new Error("Field 'data' tidak ditemukan");
-    buildTable(json.data);
-    document.getElementById("loading").style.display = "none";
-    document.getElementById("dailyTable").style.display = "table";
-  })
-  .catch(err => {
-    document.getElementById("loading").innerText =
-      "Gagal memuat data: " + err.message;
+function buildHeader() {
+  const headerRow = document.getElementById("headerRow");
+  headerRow.innerHTML = `
+    <th class="sticky-alat col-alat">Alat</th>
+    <th class="sticky-site col-site">Site</th>
+  `;
+  weekDates.forEach(d => {
+    const th = document.createElement("th");
+    th.className = "date-col";
+    th.textContent = d.label;
+    headerRow.appendChild(th);
   });
+
+  const footerRow = document.getElementById("footerRow");
+  footerRow.innerHTML = `
+    <td class="sticky-alat">Jumlah Done</td>
+    <td class="sticky-site"></td>
+  `;
+  weekDates.forEach(() => footerRow.appendChild(document.createElement("td")));
+}
+
+function loadData() {
+  document.getElementById("loading").style.display = "block";
+  document.getElementById("dailyTable").style.display = "none";
+
+  fetch(SCRIPT_URL + "?t=" + Date.now())
+    .then(r => r.text())
+    .then(text => {
+      const json = JSON.parse(text);
+      buildTable(json.data || []);
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("dailyTable").style.display = "table";
+    })
+    .catch(() => {
+      document.getElementById("loading").innerText = "Gagal memuat data";
+    });
+}
 
 function buildTable(data) {
   const tbody = document.getElementById("tableBody");
@@ -218,12 +256,10 @@ function buildTable(data) {
 
   data.forEach(row => {
     const tr = document.createElement("tr");
-
     tr.innerHTML = `
       <td class="sticky-alat col-alat">${row.Alat || ""}</td>
       <td class="sticky-site col-site">${row.Site || ""}</td>
     `;
-
     weekDates.forEach(d => {
       const val = row[d.iso];
       let html = "—";
@@ -232,20 +268,10 @@ function buildTable(data) {
       if (val === "Open") html = `<span class="pill open">Open</span>`;
       tr.innerHTML += `<td class="date-col">${html}</td>`;
     });
-
     tbody.appendChild(tr);
   });
 
   updateFooter();
-}
-
-function sortByDone(col) {
-  const tbody = document.getElementById("tableBody");
-  const rows = [...tbody.rows];
-  rows.sort((a, b) =>
-    b.cells[col].innerText === "Done" ? 1 : -1
-  );
-  rows.forEach(r => tbody.appendChild(r));
 }
 
 function updateFooter() {
@@ -254,9 +280,21 @@ function updateFooter() {
     document.querySelectorAll("#tableBody tr").forEach(r => {
       if (r.cells[i + 2].innerText === "Done") count++;
     });
-    footerRow.cells[i + 2].innerText = count || "—";
+    document.getElementById("footerRow").cells[i + 2].textContent = count || "—";
   });
 }
+
+function changeWeek(delta) {
+  weekOffset += delta;
+  weekDates = getWeekDates(weekOffset);
+  buildHeader();
+  loadData();
+}
+
+/* INIT */
+weekDates = getWeekDates(0);
+buildHeader();
+loadData();
 </script>
 
 </body>
