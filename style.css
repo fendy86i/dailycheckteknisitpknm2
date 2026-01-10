@@ -7,8 +7,7 @@ body {
 h1 {
   color: white;
   text-align: center;
-  padding-top: 14px;
-  margin-bottom: 10px;
+  margin: 12px 0;
   font-size: 22px;
 }
 
@@ -18,12 +17,6 @@ h1 {
   padding: 8px;
   border-radius: 10px;
   max-width: 1200px;
-}
-
-#loading {
-  text-align: center;
-  padding: 16px;
-  font-weight: bold;
 }
 
 .table-wrapper {
@@ -37,7 +30,6 @@ table {
   table-layout: fixed;
   width: 100%;
   min-width: 920px;
-  font-size: 14px;
 }
 
 th, td {
@@ -47,42 +39,63 @@ th, td {
   white-space: nowrap;
 }
 
-thead th {
+.sticky-top {
   position: sticky;
   top: 0;
   background: #f1f3f5;
-  z-index: 100;
+  z-index: 120;
 }
 
 .col-alat {
-  width: 108px;
-  min-width: 108px;
+  width: 110px;
 }
 
 .col-site {
   width: 72px;
-  min-width: 72px;
 }
 
 .sticky-alat {
   position: sticky;
   left: 0;
   background: #fafafa;
-  z-index: 90;
+  z-index: 110;
   text-align: left;
   padding-left: 8px;
 }
 
 .sticky-site {
   position: sticky;
-  left: 108px;
+  left: 110px;
   background: #fafafa;
-  z-index: 85;
+  z-index: 105;
 }
 
 .date-col {
   width: 70px;
-  min-width: 70px;
+}
+
+.header-wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sort-stack {
+  display: flex;
+  flex-direction: column;
+}
+
+.sort-stack button {
+  border: none;
+  background: none;
+  font-size: 11px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+}
+
+.sort-stack button:hover {
+  color: #000;
 }
 
 .pill {
@@ -103,62 +116,28 @@ tfoot td {
   bottom: 0;
   background: #f1f3f5;
   font-weight: bold;
-  z-index: 80;
 }
 
-/* Navigation */
 .nav-bottom {
   display: flex;
   justify-content: center;
   gap: 22px;
-  padding: 12px 0 4px;
+  padding: 12px 0 6px;
 }
 
 .nav-bottom button {
-  border: none;
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  font-size: 20px;
-  font-weight: bold;
-  cursor: pointer;
+  border: none;
   background: #24084F;
   color: white;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+  font-size: 20px;
 }
 
 @media (max-width: 768px) {
   table { min-width: 100%; }
-
   .col-alat { width: 100px; }
   .col-site { width: 64px; }
   .sticky-site { left: 100px; }
-  .date-col { width: 64px; }
-
-  .nav-bottom button {
-    width: 54px;
-    height: 54px;
-    font-size: 22px;
-  }
-}
-
-.header-flex {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-}
-
-.sort-btn {
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 12px;
-  line-height: 1;
-  padding: 0;
-  color: #555;
-}
-
-.sort-btn:hover {
-  color: #000;
 }
