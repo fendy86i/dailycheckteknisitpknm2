@@ -19,9 +19,7 @@
 <div class="table-wrapper">
 <table id="dailyTable" style="display:none">
 <thead>
-<tr id="headerRow">
-  <!-- headers injected by JS -->
-</tr>
+<tr id="headerRow"></tr>
 </thead>
 
 <tbody id="tableBody"></tbody>
@@ -52,6 +50,7 @@ startDate.setHours(0,0,0,0);
 let dateWindow = [];
 let cachedData = [];
 let originalOrder = [];
+let sortState = {}; // key -> 0,1,2
 
 function buildDateWindow() {
   dateWindow = Array.from({ length: 7 }, (_, i) => {
@@ -64,46 +63,39 @@ function buildDateWindow() {
   });
 }
 
-function headerWithSort(label, upFn, downFn) {
+function header(label, key, type) {
   return `
     <div class="header-wrap">
       <span>${label}</span>
-      <div class="sort-stack">
-        <button onclick="${upFn}">▲</button>
-        <button onclick="${downFn}">▼</button>
-      </div>
+      <button class="sort-one" onclick="sortColumn('${key}','${type}',this)">▲</button>
     </div>
   `;
 }
 
 function buildHeaderFooter() {
-  const headerRow = document.getElementById("headerRow");
-  headerRow.innerHTML = `
+  const hr = document.getElementById("headerRow");
+  hr.innerHTML = `
     <th class="sticky-alat col-alat sticky-top">
-      ${headerWithSort("Alat", "sortText('Alat',true)", "sortText('Alat',false)")}
+      ${header("Alat","Alat","text")}
     </th>
     <th class="sticky-site col-site sticky-top">
-      ${headerWithSort("Site", "sortText('Site',true)", "sortText('Site',false)")}
+      ${header("Site","Site","text")}
     </th>
   `;
 
   dateWindow.forEach(d => {
     const th = document.createElement("th");
     th.className = "date-col sticky-top";
-    th.innerHTML = headerWithSort(
-      d.label,
-      `sortDone('${d.iso}',true)`,
-      `sortDone('${d.iso}',false)`
-    );
-    headerRow.appendChild(th);
+    th.innerHTML = header(d.label, d.iso, "date");
+    hr.appendChild(th);
   });
 
-  const footerRow = document.getElementById("footerRow");
-  footerRow.innerHTML = `
+  const fr = document.getElementById("footerRow");
+  fr.innerHTML = `
     <td class="sticky-alat">Jumlah Done</td>
     <td class="sticky-site"></td>
   `;
-  dateWindow.forEach(() => footerRow.appendChild(document.createElement("td")));
+  dateWindow.forEach(() => fr.appendChild(document.createElement("td")));
 }
 
 fetch(SCRIPT_URL + "?t=" + Date.now())
@@ -126,26 +118,26 @@ function render() {
 }
 
 function buildTable() {
-  const tbody = document.getElementById("tableBody");
-  tbody.innerHTML = "";
+  const tb = document.getElementById("tableBody");
+  tb.innerHTML = "";
 
-  cachedData.forEach(row => {
+  cachedData.forEach(r => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td class="sticky-alat col-alat">${row.Alat || ""}</td>
-      <td class="sticky-site col-site">${row.Site || ""}</td>
+      <td class="sticky-alat col-alat">${r.Alat || ""}</td>
+      <td class="sticky-site col-site">${r.Site || ""}</td>
     `;
 
     dateWindow.forEach(d => {
-      const val = row[d.iso];
+      const v = r[d.iso];
       let html = "—";
-      if (val === "Done") html = `<span class="pill done">Done</span>`;
-      if (val === "Miss") html = `<span class="pill miss">Miss</span>`;
-      if (val === "Open") html = `<span class="pill open">Open</span>`;
+      if (v === "Done") html = `<span class="pill done">Done</span>`;
+      if (v === "Miss") html = `<span class="pill miss">Miss</span>`;
+      if (v === "Open") html = `<span class="pill open">Open</span>`;
       tr.innerHTML += `<td class="date-col">${html}</td>`;
     });
 
-    tbody.appendChild(tr);
+    tb.appendChild(tr);
   });
 
   updateFooter();
@@ -153,35 +145,58 @@ function buildTable() {
 
 function updateFooter() {
   dateWindow.forEach((_, i) => {
-    let count = 0;
+    let c = 0;
     document.querySelectorAll("#tableBody tr").forEach(r => {
-      if (r.cells[i + 2].innerText === "Done") count++;
+      if (r.cells[i + 2].innerText === "Done") c++;
     });
-    document.getElementById("footerRow").cells[i + 2].textContent = count || "—";
+    document.getElementById("footerRow").cells[i + 2].textContent = c || "—";
   });
 }
 
-/* SORT FUNCTIONS */
-function sortDone(iso, toTop) {
-  cachedData.sort((a, b) => {
-    const av = a[iso] === "Done" ? 1 : 0;
-    const bv = b[iso] === "Done" ? 1 : 0;
-    return toTop ? bv - av : av - bv;
-  });
+/* ===== 3-STATE SORT ===== */
+function sortColumn(key, type, btn) {
+  const state = (sortState[key] ?? 0);
+  sortState = {}; // reset others
+  sortState[key] = (state + 1) % 3;
+
+  document.querySelectorAll(".sort-one").forEach(b => b.textContent = "▲");
+
+  if (sortState[key] === 0) {
+    cachedData = [...originalOrder];
+    btn.textContent = "△";
+  }
+
+  if (sortState[key] === 1) {
+    btn.textContent = "▲";
+    if (type === "text") {
+      cachedData.sort((a,b) =>
+        (a[key]||"").localeCompare(b[key]||"")
+      );
+    } else {
+      cachedData.sort((a,b) =>
+        (b[key]==="Done") - (a[key]==="Done")
+      );
+    }
+  }
+
+  if (sortState[key] === 2) {
+    btn.textContent = "▼";
+    if (type === "text") {
+      cachedData.sort((a,b) =>
+        (b[key]||"").localeCompare(a[key]||"")
+      );
+    } else {
+      cachedData.sort((a,b) =>
+        (a[key]==="Done") - (b[key]==="Done")
+      );
+    }
+  }
+
   buildTable();
 }
 
-function sortText(key, asc) {
-  cachedData.sort((a, b) => {
-    const av = (a[key] || "").toLowerCase();
-    const bv = (b[key] || "").toLowerCase();
-    return asc ? av.localeCompare(bv) : bv.localeCompare(av);
-  });
-  buildTable();
-}
-
-function shiftDay(delta) {
-  startDate.setDate(startDate.getDate() + delta);
+function shiftDay(d) {
+  startDate.setDate(startDate.getDate() + d);
   render();
 }
 </script>
