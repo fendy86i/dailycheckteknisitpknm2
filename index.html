@@ -18,6 +18,7 @@
 
 <div class="table-wrapper">
 <table id="dailyTable" style="display:none">
+
 <thead>
 <tr id="headerRow"></tr>
 </thead>
@@ -26,10 +27,11 @@
 
 <tfoot>
 <tr id="footerRow">
-  <th class="sticky-alat jumlah-label">Jumlah Done</th>
-  <th class="sticky-site"></th>
+  <th class="sticky-alat sticky-footer jumlah-label">Jumlah Done</th>
+  <th class="sticky-site sticky-footer"></th>
 </tr>
 </tfoot>
+
 </table>
 </div>
 
@@ -88,8 +90,8 @@ function buildHeaderFooter() {
 
   const fr = document.getElementById("footerRow");
   fr.innerHTML = `
-    <th class="sticky-alat jumlah-label">Jumlah Done</th>
-    <th class="sticky-site"></th>
+    <th class="sticky-alat sticky-footer jumlah-label">Jumlah Done</th>
+    <th class="sticky-site sticky-footer"></th>
   `;
   dateWindow.forEach(() => fr.appendChild(document.createElement("td")));
 }
