@@ -20,8 +20,7 @@
 <table id="dailyTable" style="display:none">
 <thead>
 <tr id="headerRow">
-  <th class="sticky-alat col-alat">Alat</th>
-  <th class="sticky-site col-site">Site</th>
+  <!-- headers injected by JS -->
 </tr>
 </thead>
 
@@ -53,7 +52,6 @@ startDate.setHours(0,0,0,0);
 let dateWindow = [];
 let cachedData = [];
 let originalOrder = [];
-let sortState = {}; // { isoDate: true/false }
 
 function buildDateWindow() {
   dateWindow = Array.from({ length: 7 }, (_, i) => {
@@ -66,22 +64,37 @@ function buildDateWindow() {
   });
 }
 
+function headerWithSort(label, upFn, downFn) {
+  return `
+    <div class="header-wrap">
+      <span>${label}</span>
+      <div class="sort-stack">
+        <button onclick="${upFn}">▲</button>
+        <button onclick="${downFn}">▼</button>
+      </div>
+    </div>
+  `;
+}
+
 function buildHeaderFooter() {
   const headerRow = document.getElementById("headerRow");
   headerRow.innerHTML = `
-    <th class="sticky-alat col-alat">Alat</th>
-    <th class="sticky-site col-site">Site</th>
+    <th class="sticky-alat col-alat sticky-top">
+      ${headerWithSort("Alat", "sortText('Alat',true)", "sortText('Alat',false)")}
+    </th>
+    <th class="sticky-site col-site sticky-top">
+      ${headerWithSort("Site", "sortText('Site',true)", "sortText('Site',false)")}
+    </th>
   `;
 
   dateWindow.forEach(d => {
     const th = document.createElement("th");
-    th.className = "date-col sortable";
-    th.innerHTML = `
-      <div class="header-flex">
-        <span>${d.label}</span>
-        <button class="sort-btn" onclick="sortByDate('${d.iso}')">▲</button>
-      </div>
-    `;
+    th.className = "date-col sticky-top";
+    th.innerHTML = headerWithSort(
+      d.label,
+      `sortDone('${d.iso}',true)`,
+      `sortDone('${d.iso}',false)`
+    );
     headerRow.appendChild(th);
   });
 
@@ -148,23 +161,22 @@ function updateFooter() {
   });
 }
 
-/* 🔽 SORTING LOGIC */
-function sortByDate(iso) {
-  const isSorted = sortState[iso];
+/* SORT FUNCTIONS */
+function sortDone(iso, toTop) {
+  cachedData.sort((a, b) => {
+    const av = a[iso] === "Done" ? 1 : 0;
+    const bv = b[iso] === "Done" ? 1 : 0;
+    return toTop ? bv - av : av - bv;
+  });
+  buildTable();
+}
 
-  if (!isSorted) {
-    cachedData.sort((a, b) => {
-      const av = a[iso] === "Done" ? 1 : 0;
-      const bv = b[iso] === "Done" ? 1 : 0;
-      return bv - av;
-    });
-  } else {
-    cachedData = [...originalOrder];
-  }
-
-  sortState = {};
-  sortState[iso] = !isSorted;
-
+function sortText(key, asc) {
+  cachedData.sort((a, b) => {
+    const av = (a[key] || "").toLowerCase();
+    const bv = (b[key] || "").toLowerCase();
+    return asc ? av.localeCompare(bv) : bv.localeCompare(av);
+  });
   buildTable();
 }
 
