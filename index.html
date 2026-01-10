@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Daily Check Teknisi</title>
 
+<!-- External CSS -->
 <link rel="stylesheet" href="style.css">
 </head>
 
@@ -12,31 +13,29 @@
 
 <h1>Daily Check Teknisi</h1>
 
-<div class="card">
+<div id="table-card">
 
-<div id="loading">Memuat data...</div>
+  <div id="loading">Memuat data...</div>
 
-<div class="table-wrapper">
-<table id="dailyTable" style="display:none">
-<thead>
-<tr id="headerRow"></tr>
-</thead>
+  <div class="table-container">
+    <table id="dailyTable" style="display:none">
+      <thead>
+        <tr id="headerRow"></tr>
+      </thead>
 
-<tbody id="tableBody"></tbody>
+      <tbody id="tableBody"></tbody>
 
-<tfoot>
-<tr id="footerRow">
-  <td class="sticky-alat">Jumlah Done</td>
-  <td class="sticky-site"></td>
-</tr>
-</tfoot>
-</table>
-</div>
+      <tfoot>
+        <tr id="footerRow"></tr>
+      </tfoot>
+    </table>
+  </div>
 
-<div class="nav-bottom">
-  <button onclick="shiftDay(-1)">◀</button>
-  <button onclick="shiftDay(1)">▶</button>
-</div>
+  <!-- Navigation BELOW table -->
+  <div class="nav-bottom" style="text-align:center; margin-top:10px;">
+    <button onclick="shiftDay(-1)">◀</button>
+    <button onclick="shiftDay(1)">▶</button>
+  </div>
 
 </div>
 
@@ -52,6 +51,9 @@ let cachedData = [];
 let originalOrder = [];
 let sortState = {}; // key -> 0,1,2
 
+/* =========================
+   DATE WINDOW (7 DAYS)
+========================= */
 function buildDateWindow() {
   dateWindow = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(startDate);
@@ -63,45 +65,60 @@ function buildDateWindow() {
   });
 }
 
+/* =========================
+   HEADER TEMPLATE
+========================= */
 function header(label, key, type) {
   return `
     <div class="header-wrap">
-      <span>${label}</span>
+      ${label}
       <button class="sort-one" onclick="sortColumn('${key}','${type}',this)">▲</button>
     </div>
   `;
 }
 
+/* =========================
+   BUILD HEADER + FOOTER
+========================= */
 function buildHeaderFooter() {
   const hr = document.getElementById("headerRow");
-  hr.innerHTML = `
-    <th class="sticky-alat col-alat sticky-top">
+  hr.innerHTML = "";
+
+  hr.innerHTML += `
+    <th class="col-alat">
       ${header("Alat","Alat","text")}
     </th>
-    <th class="sticky-site col-site sticky-top">
+    <th class="col-site">
       ${header("Site","Site","text")}
     </th>
   `;
 
   dateWindow.forEach(d => {
     const th = document.createElement("th");
-    th.className = "date-col sticky-top";
+    th.className = "date-col";
     th.innerHTML = header(d.label, d.iso, "date");
     hr.appendChild(th);
   });
 
   const fr = document.getElementById("footerRow");
   fr.innerHTML = `
-    <td class="sticky-alat">Jumlah Done</td>
-    <td class="sticky-site"></td>
+    <th class="jumlah-label" colspan="2">Jumlah Done</th>
   `;
-  dateWindow.forEach(() => fr.appendChild(document.createElement("td")));
+
+  dateWindow.forEach(() => {
+    const td = document.createElement("td");
+    td.textContent = "—";
+    fr.appendChild(td);
+  });
 }
 
+/* =========================
+   FETCH DATA (ONCE)
+========================= */
 fetch(SCRIPT_URL + "?t=" + Date.now())
-  .then(r => r.text())
-  .then(text => {
-    cachedData = JSON.parse(text).data || [];
+  .then(r => r.json())
+  .then(json => {
+    cachedData = json.data || [];
     originalOrder = [...cachedData];
     document.getElementById("loading").style.display = "none";
     document.getElementById("dailyTable").style.display = "table";
@@ -111,29 +128,36 @@ fetch(SCRIPT_URL + "?t=" + Date.now())
     document.getElementById("loading").innerText = "Gagal memuat data";
   });
 
+/* =========================
+   RENDER TABLE
+========================= */
 function render() {
   buildDateWindow();
   buildHeaderFooter();
   buildTable();
 }
 
+/* =========================
+   BUILD BODY
+========================= */
 function buildTable() {
   const tb = document.getElementById("tableBody");
   tb.innerHTML = "";
 
   cachedData.forEach(r => {
     const tr = document.createElement("tr");
+
     tr.innerHTML = `
-      <td class="sticky-alat col-alat">${r.Alat || ""}</td>
-      <td class="sticky-site col-site">${r.Site || ""}</td>
+      <td class="col-alat">${r.Alat || ""}</td>
+      <td class="col-site">${r.Site || ""}</td>
     `;
 
     dateWindow.forEach(d => {
       const v = r[d.iso];
       let html = "—";
-      if (v === "Done") html = `<span class="pill done">Done</span>`;
-      if (v === "Miss") html = `<span class="pill miss">Miss</span>`;
-      if (v === "Open") html = `<span class="pill open">Open</span>`;
+      if (v === "Done") html = `<span class="pill pill-success">Done</span>`;
+      if (v === "Miss") html = `<span class="pill pill-danger">Miss</span>`;
+      if (v === "Open") html = `<span class="pill pill-warning">Open</span>`;
       tr.innerHTML += `<td class="date-col">${html}</td>`;
     });
 
@@ -143,60 +167,59 @@ function buildTable() {
   updateFooter();
 }
 
+/* =========================
+   FOOTER COUNTS
+========================= */
 function updateFooter() {
   dateWindow.forEach((_, i) => {
-    let c = 0;
-    document.querySelectorAll("#tableBody tr").forEach(r => {
-      if (r.cells[i + 2].innerText === "Done") c++;
+    let count = 0;
+    document.querySelectorAll("#tableBody tr").forEach(row => {
+      if (row.cells[i + 2].innerText.trim() === "Done") count++;
     });
-    document.getElementById("footerRow").cells[i + 2].textContent = c || "—";
+    document.getElementById("footerRow").cells[i + 1].textContent = count || "—";
   });
 }
 
-/* ===== 3-STATE SORT ===== */
+/* =========================
+   3-STATE SORT
+========================= */
 function sortColumn(key, type, btn) {
-  const state = (sortState[key] ?? 0);
-  sortState = {}; // reset others
+  const state = sortState[key] ?? 0;
+  sortState = {};
   sortState[key] = (state + 1) % 3;
 
   document.querySelectorAll(".sort-one").forEach(b => b.textContent = "▲");
 
   if (sortState[key] === 0) {
     cachedData = [...originalOrder];
-    btn.textContent = "△";
+    return buildTable();
   }
 
   if (sortState[key] === 1) {
-    btn.textContent = "▲";
     if (type === "text") {
-      cachedData.sort((a,b) =>
-        (a[key]||"").localeCompare(b[key]||"")
-      );
+      cachedData.sort((a,b) => (a[key]||"").localeCompare(b[key]||""));
     } else {
-      cachedData.sort((a,b) =>
-        (b[key]==="Done") - (a[key]==="Done")
-      );
+      cachedData.sort((a,b) => (b[key]==="Done") - (a[key]==="Done"));
     }
   }
 
   if (sortState[key] === 2) {
     btn.textContent = "▼";
     if (type === "text") {
-      cachedData.sort((a,b) =>
-        (b[key]||"").localeCompare(a[key]||"")
-      );
+      cachedData.sort((a,b) => (b[key]||"").localeCompare(a[key]||""));
     } else {
-      cachedData.sort((a,b) =>
-        (a[key]==="Done") - (b[key]==="Done")
-      );
+      cachedData.sort((a,b) => (a[key]==="Done") - (b[key]==="Done"));
     }
   }
 
   buildTable();
 }
 
-function shiftDay(d) {
-  startDate.setDate(startDate.getDate() + d);
+/* =========================
+   DAY SHIFT
+========================= */
+function shiftDay(delta) {
+  startDate.setDate(startDate.getDate() + delta);
   render();
 }
 </script>
