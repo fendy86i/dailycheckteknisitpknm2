@@ -308,4 +308,62 @@ function buildTable(){
       let v=r[d.iso];
       let html="—";
       if(v==="Done") html=`<span class="pill done">Done</span>`;
-      if(v==="Miss") html=`<span class="pill miss"
+      if(v==="Miss") html=`<span class="pill miss">Miss</span>`;
+      if(v==="Open") html=`<span class="pill open">Open</span>`;
+      tr.innerHTML+=`<td class="date-col">${html}</td>`;
+    });
+    tableBody.appendChild(tr);
+  });
+  updateFooter();
+}
+
+function updateFooter(){
+  dateWindow.forEach((_,i)=>{
+    let c=0;
+    document.querySelectorAll("#tableBody tr").forEach(r=>{
+      if(r.cells[i+2].innerText==="Done") c++;
+    });
+    footerRow.cells[i+2].textContent=c||"—";
+  });
+}
+
+function sortColumn(key,type,btn){
+  const s=sortState[key]??0;
+  sortState={};
+  sortState[key]=(s+1)%3;
+  document.querySelectorAll(".sort-one").forEach(b=>b.textContent="▲");
+
+  if(sortState[key]===0){
+    cachedData=[...originalOrder];
+    btn.textContent="△";
+  }
+  if(sortState[key]===1){
+    btn.textContent="▲";
+    cachedData.sort((a,b)=>
+      type==="text"
+      ?(a[key]||"").localeCompare(b[key]||"")
+      :(b[key]==="Done")-(a[key]==="Done")
+    );
+  }
+  if(sortState[key]===2){
+    btn.textContent="▼";
+    cachedData.sort((a,b)=>
+      type==="text"
+      ?(b[key]||"").localeCompare(a[key]||"")
+      :(a[key]==="Done")-(b[key]==="Done")
+    );
+  }
+  buildTable();
+}
+
+function shiftDay(d){
+  const n=new Date(startDate);
+  n.setDate(n.getDate()+d);
+  if(n>today) return;
+  startDate=n;
+  render();
+}
+</script>
+
+</body>
+</html>
