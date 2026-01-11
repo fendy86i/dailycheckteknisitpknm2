@@ -177,3 +177,10 @@ th, td {
     font-size: 13px;
   }
 }
+
+/* ===== MATCH ALAT & SITE FONT SIZE WITH STATUS ===== */
+.sticky-alat,
+.sticky-site {
+  font-size: 13px;
+}
+
