@@ -42,17 +42,13 @@
 const SCRIPT_URL =
 "https://script.google.com/macros/s/AKfycbxSwSlCEN9ar6MILTXA5W4p0GkGWbHIp77yXiAACd8Bvoi2eOG48TFtXRvuUt31oFkx/exec";
 
-/* ===== LOCAL DATE UTIL ===== */
-function localISO(date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
+/* ===== LOCAL DATE ===== */
+function localISO(d){
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 }
 
-/* ===== TODAY (LOCAL MIDNIGHT) ===== */
 const today = new Date();
-today.setHours(0, 0, 0, 0);
+today.setHours(0,0,0,0);
 
 let startDate = new Date(today);
 let cachedData = [];
@@ -60,164 +56,122 @@ let originalOrder = [];
 let dateWindow = [];
 let sortState = {};
 
-/* ===== BUILD FIXED 7-DAY WINDOW ===== */
-function buildDateWindow() {
+function buildDateWindow(){
   dateWindow = [];
-
-  for (let i = 0; i < 7; i++) {
+  for(let i=0;i<7;i++){
     const d = new Date(startDate);
-    d.setDate(startDate.getDate() + i);
-
+    d.setDate(startDate.getDate()+i);
     dateWindow.push({
-      date: d,
+      label: d.toLocaleDateString("id-ID",{day:"numeric",month:"short"}),
       iso: localISO(d),
-      isFuture: d > today,
-      label: d.toLocaleDateString("id-ID", {
-        day: "numeric",
-        month: "short"
-      })
+      future: d > today
     });
   }
 }
 
-function header(label, key, type) {
+function header(label,key,type){
   return `
-    <div class="header-wrap">
-      <span>${label}</span>
-      <button class="sort-one" onclick="sortColumn('${key}','${type}',this)">▲</button>
-    </div>
-  `;
+  <div class="header-wrap">
+    <span>${label}</span>
+    <button class="sort-one" onclick="sortColumn('${key}','${type}',this)">▲</button>
+  </div>`;
 }
 
-function buildHeaderFooter() {
-  const hr = document.getElementById("headerRow");
-  hr.innerHTML = `
+function buildHeaderFooter(){
+  headerRow.innerHTML = `
     <th class="sticky-alat col-alat">${header("Alat","Alat","text")}</th>
     <th class="sticky-site col-site">${header("Site","Site","text")}</th>
   `;
 
-  dateWindow.forEach(d => {
-    const th = document.createElement("th");
-    th.className = "date-col";
-    th.innerHTML = header(d.label, d.iso, "date");
-    hr.appendChild(th);
+  dateWindow.forEach(d=>{
+    const th=document.createElement("th");
+    th.className="date-col";
+    th.innerHTML=header(d.label,d.iso,"date");
+    headerRow.appendChild(th);
   });
 
-  const fr = document.getElementById("footerRow");
-  fr.innerHTML = `
-    <th class="sticky-alat jumlah-label">Jumlah Done</th>
-    <th class="sticky-site"></th>
+  footerRow.innerHTML=`
+    <th class="sticky-alat col-alat">Jumlah Done</th>
+    <th class="sticky-site col-site"></th>
   `;
 
-  dateWindow.forEach(() => {
-    const td = document.createElement("td");
-    td.className = "date-col";
-    fr.appendChild(td);
-  });
+  dateWindow.forEach(()=>footerRow.appendChild(document.createElement("td")));
 }
 
-fetch(SCRIPT_URL + "?t=" + Date.now())
-  .then(r => r.json())
-  .then(json => {
-    cachedData = json.data || [];
-    originalOrder = [...cachedData];
-    loading.style.display = "none";
-    dailyTable.style.display = "table";
-    render();
-  })
-  .catch(() => loading.textContent = "Gagal memuat data");
+fetch(SCRIPT_URL+"?t="+Date.now())
+.then(r=>r.json())
+.then(j=>{
+  cachedData=j.data||[];
+  originalOrder=[...cachedData];
+  loading.style.display="none";
+  dailyTable.style.display="table";
+  render();
+});
 
-function render() {
+function render(){
   buildDateWindow();
   buildHeaderFooter();
   buildTable();
 }
 
-function buildTable() {
-  const tb = document.getElementById("tableBody");
-  tb.innerHTML = "";
-
-  cachedData.forEach(r => {
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td class="sticky-alat col-alat">${r.Alat || ""}</td>
-      <td class="sticky-site col-site">${r.Site || ""}</td>
+function buildTable(){
+  tableBody.innerHTML="";
+  cachedData.forEach(r=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td class="sticky-alat col-alat">${r.Alat||""}</td>
+      <td class="sticky-site col-site">${r.Site||""}</td>
     `;
-
-    dateWindow.forEach(d => {
-      let html = "—";
-
-      if (!d.isFuture) {
-        const v = r[d.iso];
-        if (v === "Done") html = `<span class="pill done">Done</span>`;
-        if (v === "Miss") html = `<span class="pill miss">Miss</span>`;
-        if (v === "Open") html = `<span class="pill open">Open</span>`;
-      }
-
-      tr.innerHTML += `<td class="date-col">${html}</td>`;
+    dateWindow.forEach(d=>{
+      let v = d.future ? null : r[d.iso];
+      let html="—";
+      if(v==="Done") html=`<span class="pill done">Done</span>`;
+      if(v==="Miss") html=`<span class="pill miss">Miss</span>`;
+      if(v==="Open") html=`<span class="pill open">Open</span>`;
+      tr.innerHTML+=`<td class="date-col">${html}</td>`;
     });
-
-    tb.appendChild(tr);
+    tableBody.appendChild(tr);
   });
-
   updateFooter();
 }
 
-function updateFooter() {
-  dateWindow.forEach((d, i) => {
-    if (d.isFuture) {
-      footerRow.cells[i + 2].textContent = "—";
-      return;
-    }
-
-    let c = 0;
-    document.querySelectorAll("#tableBody tr").forEach(r => {
-      if (r.cells[i + 2].innerText === "Done") c++;
+function updateFooter(){
+  dateWindow.forEach((d,i)=>{
+    if(d.future){ footerRow.cells[i+2].textContent="—"; return; }
+    let c=0;
+    document.querySelectorAll("#tableBody tr").forEach(r=>{
+      if(r.cells[i+2].innerText==="Done") c++;
     });
-    footerRow.cells[i + 2].textContent = c;
+    footerRow.cells[i+2].textContent=c||"—";
   });
 }
 
-function sortColumn(key, type, btn) {
-  const s = sortState[key] ?? 0;
-  sortState = {};
-  sortState[key] = (s + 1) % 3;
+function sortColumn(key,type,btn){
+  const s=sortState[key]??0;
+  sortState={}; sortState[key]=(s+1)%3;
+  document.querySelectorAll(".sort-one").forEach(b=>b.textContent="▲");
 
-  document.querySelectorAll(".sort-one").forEach(b => b.textContent = "▲");
-
-  if (sortState[key] === 0) {
-    cachedData = [...originalOrder];
-    btn.textContent = "△";
+  if(sortState[key]===0){ cachedData=[...originalOrder]; btn.textContent="△"; }
+  if(sortState[key]===1){
+    btn.textContent="▲";
+    cachedData.sort((a,b)=>type==="text"
+      ?(a[key]||"").localeCompare(b[key]||"")
+      :(b[key]==="Done")-(a[key]==="Done"));
   }
-
-  if (sortState[key] === 1) {
-    btn.textContent = "▲";
-    cachedData.sort((a,b) =>
-      type === "text"
-        ? (a[key]||"").localeCompare(b[key]||"")
-        : (b[key]==="Done") - (a[key]==="Done")
-    );
+  if(sortState[key]===2){
+    btn.textContent="▼";
+    cachedData.sort((a,b)=>type==="text"
+      ?(b[key]||"").localeCompare(a[key]||"")
+      :(a[key]==="Done")-(b[key]==="Done"));
   }
-
-  if (sortState[key] === 2) {
-    btn.textContent = "▼";
-    cachedData.sort((a,b) =>
-      type === "text"
-        ? (b[key]||"").localeCompare(a[key]||"")
-        : (a[key]==="Done") - (b[key]==="Done")
-    );
-  }
-
   buildTable();
 }
 
-function shiftDay(d) {
-  const next = new Date(startDate);
-  next.setDate(next.getDate() + d);
-
-  if (next > today) return;
-  startDate = next;
+function shiftDay(d){
+  const n=new Date(startDate);
+  n.setDate(n.getDate()+d);
+  if(n>today) return;
+  startDate=n;
   render();
 }
 </script>
