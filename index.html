@@ -97,8 +97,8 @@ function buildHeaderFooter(){
 
   dateWindow.forEach(()=>footerRow.appendChild(document.createElement("td")));
 }
+fetch(SCRIPT_URL + "?getDashboard=true&t=" + Date.now())
 
-fetch(SCRIPT_URL+"?t="+Date.now())
 .then(r=>r.json())
 .then(j=>{
   cachedData=j.data||[];
