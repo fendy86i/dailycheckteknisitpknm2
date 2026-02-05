@@ -160,6 +160,27 @@ function shiftDay(d){
     startDate=n;
     render();
 }
+
+ /* ===== AUTO-RELOAD LOGIC ===== */
+
+// Function to fetch fresh data and re-render
+function refreshDashboard() {
+    console.log("Auto-refreshing data...");
+    
+    // We call the same fetch logic you already have
+    fetch(SCRIPT_URL + "?getDashboard=true&t=" + Date.now())
+    .then(r => r.json())
+    .then(j => {
+        cachedData = j.data || [];
+        originalOrder = [...cachedData];
+        render(); // This rebuilds the table with the new data
+        console.log("Data refreshed successfully at " + new Date().toLocaleTimeString());
+    })
+    .catch(err => console.error("Auto-refresh failed:", err));
+}
+
+// Set the interval to 30 minutes (1,800,000 ms)
+setInterval(refreshDashboard, 1800000);
 </script>
 </body>
 </html>
